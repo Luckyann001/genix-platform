@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { successResponse, unauthorizedResponse, serverErrorResponse } from '@/lib/api-response'
 import { NextRequest } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   const supabase = createClient()
   
