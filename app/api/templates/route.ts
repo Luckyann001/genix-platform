@@ -5,6 +5,19 @@ import { NextRequest } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
+function slugify(value: string): string {
+  const slug = value
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-')
+
+  if (!slug) return 'template'
+  return slug.slice(0, 80).replace(/-+$/g, '') || 'template'
+}
+
 export async function GET() {
   const templates = await listMarketplaceTemplates()
   return successResponse({ templates })
@@ -54,24 +67,42 @@ export async function POST(request: NextRequest) {
       review_status: 'pending',
     }
 
-    const { data, error } = await supabase
-      .from('templates')
-      .insert({
-        name,
-        description: longDescription,
-        price: Math.round(rawPrice),
-        category,
-        github_url: githubUrl,
-        demo_url: demoUrl || null,
-        features,
-        preview_data: previewData,
-        developer_id: developerId,
-      })
-      .select('id, name, category, price, created_at')
-      .single()
+    const baseSlug = slugify(name)
+    let insertData: any = null
+    let insertError: any = null
 
-    if (error) {
-      const dbMessage = String(error.message || '').trim()
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const slug = attempt === 0 ? baseSlug : `${baseSlug}-${attempt + 1}`
+
+      const result = await supabase
+        .from('templates')
+        .insert({
+          name,
+          slug,
+          description: longDescription,
+          price: Math.round(rawPrice),
+          category,
+          github_url: githubUrl,
+          demo_url: demoUrl || null,
+          features,
+          preview_data: previewData,
+          developer_id: developerId,
+        })
+        .select('id, name, slug, category, price, created_at')
+        .single()
+
+      insertData = result.data
+      insertError = result.error
+
+      const isSlugConflict =
+        insertError &&
+        (String(insertError.code || '') === '23505' || String(insertError.message || '').toLowerCase().includes('slug'))
+
+      if (!isSlugConflict) break
+    }
+
+    if (insertError) {
+      const dbMessage = String(insertError.message || '').trim()
       if (dbMessage) {
         return errorResponse(`Template submission failed: ${dbMessage}`, 500)
       }
@@ -81,7 +112,7 @@ export async function POST(request: NextRequest) {
     return successResponse(
       {
         message: 'Template submitted successfully. It is pending review before going live.',
-        template: data,
+        template: insertData,
       },
       201
     )
