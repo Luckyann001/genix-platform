@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { initializePayment, calculateFees } from '@/lib/paystack'
+import { initializePayment, calculateTemplateFees } from '@/lib/paystack'
 import { successResponse, errorResponse, unauthorizedResponse } from '@/lib/api-response'
 import { NextRequest } from 'next/server'
 
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Calculate fees
-    const fees = calculateFees(template.price)
+    const fees = calculateTemplateFees(template.price)
     
     // Create pending purchase
     const { data: purchase } = await supabase

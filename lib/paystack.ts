@@ -42,6 +42,30 @@ export function calculateFees(amount: number) {
   }
 }
 
+// Template sales: 30% platform, 70% developer
+export function calculateTemplateFees(amount: number) {
+  const platformFee = Math.round(amount * 0.30)
+  const developerEarnings = amount - platformFee
+  
+  return {
+    total: amount,
+    platformFee,        // You keep this
+    developerEarnings,  // Transfer to developer
+  }
+}
+
+// Consultations: 15% platform, 85% developer
+export function calculateConsultationFees(amount: number) {
+  const platformFee = Math.round(amount * 0.15)
+  const developerEarnings = amount - platformFee
+  
+  return {
+    total: amount,
+    platformFee,
+    developerEarnings,
+  }
+}
+
 // Format price for display
 export function formatPrice(amount: number, currency: string = 'NGN') {
   return new Intl.NumberFormat('en-NG', {

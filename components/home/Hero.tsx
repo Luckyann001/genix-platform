@@ -9,7 +9,7 @@ export function Hero() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-700 rounded-full text-sm font-medium mb-8 animate-fade-in">
             <span className="w-2 h-2 bg-primary-600 rounded-full animate-pulse"></span>
-            Built by real developers, not AI
+            Built by real professional developers.
           </div>
 
           {/* Headline */}
@@ -20,7 +20,7 @@ export function Hero() {
 
           {/* Subheadline */}
           <p className="text-xl lg:text-2xl text-gray-600 mb-10 max-w-3xl mx-auto animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            Preview, customize, and launch — without gambling on AI or freelancers
+            Preview, customize, and launch your next project in minutes. No more months of development –
           </p>
 
           {/* CTAs */}
