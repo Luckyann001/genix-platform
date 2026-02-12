@@ -102,8 +102,8 @@ export function calculateConsultationFees(amount: number) {
 }
 
 // Format price for display
-export function formatPrice(amount: number, currency: string = 'NGN') {
-  return new Intl.NumberFormat('en-NG', {
+export function formatPrice(amount: number, currency: string = 'USD') {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
   }).format(amount / 100)

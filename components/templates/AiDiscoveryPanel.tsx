@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { formatUSD } from '@/lib/currency'
 
 type Recommendation = {
   id: string
@@ -66,7 +67,7 @@ export function AiDiscoveryPanel() {
             <Link key={item.id} href={`/templates/${item.id}`} className="block rounded border border-gray-200 p-3 hover:border-primary-300">
               <p className="font-medium">{item.name}</p>
               <p className="text-sm text-gray-600">
-                {item.category} • ₦{Number(item.price || 0).toLocaleString()}
+                {item.category} • {formatUSD(Number(item.price || 0))}
               </p>
             </Link>
           ))}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { formatUSD } from '@/lib/currency'
 
 type RefundRow = {
   id: string
@@ -130,7 +131,7 @@ export function RefundDashboard() {
         <div className="space-y-4">
           {rows.map((row) => (
             <div key={row.id} className="card">
-              <p className="font-semibold">₦{Number(row.amount || 0).toLocaleString()} • {row.status}</p>
+              <p className="font-semibold">{formatUSD(Number(row.amount || 0))} • {row.status}</p>
               <p className="text-sm text-gray-700 mt-1">Reason: {row.reason}</p>
               <p className="text-xs text-gray-500 mt-1">Purchase: {row.purchase_id}</p>
               <p className="text-xs text-gray-500">Buyer: {row.buyer_id} • Seller: {row.seller_id}</p>

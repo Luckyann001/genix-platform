@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { TemplateRecord } from '@/lib/templates'
+import { formatUSD } from '@/lib/currency'
 
 type TemplateCardProps = {
   template: TemplateRecord
@@ -39,7 +40,7 @@ export function TemplateCard({ template }: TemplateCardProps) {
 
       <div className="pt-4 border-t border-gray-200 flex items-center justify-between">
         <span className="text-xs text-gray-500">{template.id}</span>
-        <span className="text-xl font-bold">₦{template.price.toLocaleString()}</span>
+        <span className="text-xl font-bold">{formatUSD(template.price)}</span>
       </div>
     </Link>
   )

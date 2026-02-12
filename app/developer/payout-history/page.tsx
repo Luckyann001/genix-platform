@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { requireAuth } from '@/lib/require-auth'
+import { formatUSD } from '@/lib/currency'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,7 +50,7 @@ export default async function DeveloperPayoutHistoryPage() {
                     <tr key={row.id} className="border-b align-top">
                       <td className="py-2 pr-4">{new Date(row.created_at).toLocaleString()}</td>
                       <td className="py-2 pr-4">{row.source_type}</td>
-                      <td className="py-2 pr-4">₦{Number(row.amount || 0).toLocaleString()}</td>
+                      <td className="py-2 pr-4">{formatUSD(Number(row.amount || 0))}</td>
                       <td className="py-2 pr-4">{row.status}</td>
                       <td className="py-2 pr-4">{row.payout_reference}</td>
                       <td className="py-2 pr-4 text-red-600">{row.error_message || '-'}</td>

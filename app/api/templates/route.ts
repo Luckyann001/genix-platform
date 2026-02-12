@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { errorResponse, serverErrorResponse, successResponse } from '@/lib/api-response'
+import { errorResponse, serverErrorResponse, successResponse, unauthorizedResponse } from '@/lib/api-response'
 import { listMarketplaceTemplates } from '@/lib/templates'
 import { NextRequest } from 'next/server'
 
@@ -32,7 +32,8 @@ export async function POST(request: NextRequest) {
     }
 
     const { data: authData } = await supabase.auth.getUser()
-    const developerId = authData.user?.id ?? null
+    const developerId = authData.user?.id
+    if (!developerId) return unauthorizedResponse()
 
     const previewData = {
       summary: shortDescription || longDescription.slice(0, 160),
@@ -69,7 +70,13 @@ export async function POST(request: NextRequest) {
       .select('id, name, category, price, created_at')
       .single()
 
-    if (error) throw error
+    if (error) {
+      const dbMessage = String(error.message || '').trim()
+      if (dbMessage) {
+        return errorResponse(`Template submission failed: ${dbMessage}`, 500)
+      }
+      return errorResponse('Template submission failed due to a database error', 500)
+    }
 
     return successResponse(
       {

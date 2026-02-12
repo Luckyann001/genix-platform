@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { formatUSD } from '@/lib/currency'
 
 type TemplateRow = {
   id: string
@@ -150,7 +151,7 @@ export function ModerationDashboard() {
                 <div>
                   <h3 className="text-xl font-semibold">{template.name}</h3>
                   <p className="text-sm text-gray-600">
-                    {template.category} • ₦{Number(template.price || 0).toLocaleString()} •{' '}
+                    {template.category} • {formatUSD(Number(template.price || 0))} •{' '}
                     {template.developer?.full_name || template.developer?.username || template.developer?.email || 'Unknown developer'}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">Status: {template.review_status}</p>

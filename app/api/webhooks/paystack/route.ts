@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
+import { formatUSD } from '@/lib/currency'
 
 export async function POST(request: NextRequest) {
   const body = await request.text()
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
           user_id: consultation.developer_id,
           type: 'consultation_booked',
           title: 'New Consultation Booking',
-          message: `You have a new paid consultation booking (₦${Number(consultation.amount || amount || 0).toLocaleString()}).`,
+          message: `You have a new paid consultation booking (${formatUSD(Number(consultation.amount || amount || 0))}).`,
           related_consultation_id: consultation.id,
           action_url: `/dashboard/consultations`,
         },
@@ -119,12 +120,12 @@ export async function POST(request: NextRequest) {
       action_url: `/customize/${templateId}?purchase=${purchaseId}`
     })
 
-    const developerEarnings = Math.round(amount * 0.70 / 100) // 70% in naira
+    const developerEarnings = Math.round(amount * 0.70 / 100)
     await supabase.from('notifications').insert({
       user_id: template.developer_id,
       type: 'template_sold',
       title: '💰 Template Sold!',
-      message: `Your template "${template.name}" was purchased. You earned ₦${developerEarnings}`,
+      message: `Your template "${template.name}" was purchased. You earned ${formatUSD(developerEarnings)}`,
       related_template_id: templateId,
       related_purchase_id: purchaseId,
       action_url: `/dashboard/sales`

@@ -1,14 +1,9 @@
 import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { generateSubmissionAids } from '@/lib/llm'
-import { serverErrorResponse, successResponse, unauthorizedResponse } from '@/lib/api-response'
+import { serverErrorResponse, successResponse } from '@/lib/api-response'
 
 export async function POST(request: NextRequest) {
-  const supabase = createClient()
-  const { data: authData } = await supabase.auth.getUser()
-  const user = authData.user
-  if (!user) return unauthorizedResponse()
-
   try {
     const body = await request.json()
     const context = {

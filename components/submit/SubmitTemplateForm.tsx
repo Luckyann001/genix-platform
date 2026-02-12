@@ -36,7 +36,12 @@ export function SubmitTemplateForm() {
       setAiListingCopy(result?.listing_copy || null)
       setAiChecklist(Array.isArray(result?.checklist) ? result.checklist : [])
     } catch (error: any) {
-      setAiError(error?.message || 'AI assist failed')
+      const message = String(error?.message || '')
+      if (message.includes('401') || message.toLowerCase().includes('unauthorized')) {
+        setAiError('AI provider authorization failed. Set a valid OPENAI_API_KEY in your environment and redeploy.')
+      } else {
+        setAiError(message || 'AI assist failed')
+      }
     } finally {
       setAiLoading(false)
     }
@@ -239,10 +244,10 @@ export function SubmitTemplateForm() {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Price (NGN) *</label>
+            <label className="block text-sm font-medium mb-2">Price (USD) *</label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">₦</span>
-              <input type="number" name="price" className="input pl-8" placeholder="45000" min="1" required />
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+              <input type="number" name="price" className="input pl-8" placeholder="299" min="1" required />
             </div>
             <p className="text-sm text-gray-500 mt-1">You&apos;ll receive 70% of sales revenue</p>
           </div>
@@ -302,10 +307,10 @@ export function SubmitTemplateForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Hourly Rate (NGN)</label>
+            <label className="block text-sm font-medium mb-2">Hourly Rate (USD)</label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">₦</span>
-              <input type="number" name="consultationRate" className="input pl-8" placeholder="15000" min="0" />
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+              <input type="number" name="consultationRate" className="input pl-8" placeholder="150" min="0" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">/hour</span>
             </div>
             <p className="text-sm text-gray-500 mt-1">You&apos;ll receive 85% of consulting fees</p>

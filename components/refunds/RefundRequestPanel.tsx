@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { formatUSD } from '@/lib/currency'
 
 type PurchaseRow = {
   id: string
@@ -117,7 +118,7 @@ export function RefundRequestPanel() {
               const eligible = purchase.status === 'completed' && within30Days(purchase.created_at) && purchase.refund_status !== 'pending'
               return (
                 <div key={purchase.id} className="rounded border border-gray-200 p-3">
-                  <p className="font-medium">{purchase.template?.name || 'Template'} • ₦{Number(purchase.price || 0).toLocaleString()}</p>
+                  <p className="font-medium">{purchase.template?.name || 'Template'} • {formatUSD(Number(purchase.price || 0))}</p>
                   <p className="text-xs text-gray-500">Purchase status: {purchase.status} • Refund status: {purchase.refund_status || 'none'}</p>
 
                   {eligible ? (
@@ -158,7 +159,7 @@ export function RefundRequestPanel() {
           <div className="space-y-2">
             {refunds.map((refund) => (
               <div key={refund.id} className="rounded border border-gray-200 p-3">
-                <p className="font-medium">₦{Number(refund.amount || 0).toLocaleString()} • {refund.status}</p>
+                <p className="font-medium">{formatUSD(Number(refund.amount || 0))} • {refund.status}</p>
                 <p className="text-sm text-gray-700">{refund.reason}</p>
                 {refund.admin_note && <p className="text-sm text-gray-600">Admin note: {refund.admin_note}</p>}
               </div>

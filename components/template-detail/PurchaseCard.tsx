@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { formatUSD } from '@/lib/currency'
 
 type PurchaseCardProps = {
   templateId: string
@@ -56,7 +57,7 @@ export function PurchaseCard({ templateId, templateSlug, price }: PurchaseCardPr
     <div className="card mt-4">
       <div className="flex items-center justify-between mb-3">
         <span className="text-gray-600">One-time access</span>
-        <span className="text-2xl font-bold">₦{price.toLocaleString()}</span>
+        <span className="text-2xl font-bold">{formatUSD(price)}</span>
       </div>
 
       <button type="button" className="btn btn-primary w-full" onClick={handleBuyNow} disabled={loading}>

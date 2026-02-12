@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { formatUSD } from '@/lib/currency'
 
 type PayoutSummary = {
   pending_count: number
@@ -74,7 +75,7 @@ export function PayoutDashboard() {
         <div className="card">
           <h2 className="text-2xl font-semibold mb-4">Pending Payouts</h2>
           <p className="text-gray-700">Items: {summary?.pending_count || 0}</p>
-          <p className="text-gray-700">Amount: ₦{Number(summary?.pending_total || 0).toLocaleString()}</p>
+          <p className="text-gray-700">Amount: {formatUSD(Number(summary?.pending_total || 0))}</p>
 
           <div className="mt-4 flex flex-wrap gap-3">
             <button type="button" className="btn btn-secondary" onClick={() => runPayouts(true)} disabled={running}>
@@ -98,7 +99,7 @@ export function PayoutDashboard() {
               <div key={`${result.developer_id}-${result.status}`} className="rounded border border-gray-200 p-3">
                 <p className="font-medium">Developer: {result.developer_id}</p>
                 <p className="text-sm text-gray-700">
-                  ₦{Number(result.amount || 0).toLocaleString()} • {result.entries} entries • {result.status}
+                  {formatUSD(Number(result.amount || 0))} • {result.entries} entries • {result.status}
                 </p>
                 {result.error_message && <p className="text-sm text-red-600">{result.error_message}</p>}
               </div>

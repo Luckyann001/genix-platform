@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { requireAuth } from '@/lib/require-auth'
+import { formatUSD } from '@/lib/currency'
 
 export const dynamic = 'force-dynamic'
 
@@ -61,19 +62,19 @@ export default async function DeveloperEarningsPage() {
           <div className="grid md:grid-cols-4 gap-4 mb-8">
             <div className="card">
               <p className="text-sm text-gray-600">Template Earnings</p>
-              <p className="text-2xl font-bold">₦{salesEarnings.toLocaleString()}</p>
+              <p className="text-2xl font-bold">{formatUSD(salesEarnings)}</p>
             </div>
             <div className="card">
               <p className="text-sm text-gray-600">Consultation Earnings</p>
-              <p className="text-2xl font-bold">₦{consultationEarnings.toLocaleString()}</p>
+              <p className="text-2xl font-bold">{formatUSD(consultationEarnings)}</p>
             </div>
             <div className="card">
               <p className="text-sm text-gray-600">Paid Out</p>
-              <p className="text-2xl font-bold">₦{paidOut.toLocaleString()}</p>
+              <p className="text-2xl font-bold">{formatUSD(paidOut)}</p>
             </div>
             <div className="card">
               <p className="text-sm text-gray-600">Pending Balance</p>
-              <p className="text-2xl font-bold">₦{pendingBalance.toLocaleString()}</p>
+              <p className="text-2xl font-bold">{formatUSD(pendingBalance)}</p>
             </div>
           </div>
 
@@ -86,7 +87,7 @@ export default async function DeveloperEarningsPage() {
                 <div className="space-y-3">
                   {purchases.slice(0, 8).map((row) => (
                     <div key={row.id} className="border rounded p-3">
-                      <p className="font-medium">₦{Number(row.developer_earnings || 0).toLocaleString()}</p>
+                      <p className="font-medium">{formatUSD(Number(row.developer_earnings || 0))}</p>
                       <p className="text-sm text-gray-600">Status: {row.status}</p>
                     </div>
                   ))}
@@ -102,7 +103,7 @@ export default async function DeveloperEarningsPage() {
                 <div className="space-y-3">
                   {consultations.slice(0, 8).map((row) => (
                     <div key={row.id} className="border rounded p-3">
-                      <p className="font-medium">₦{Number(row.developer_earnings || 0).toLocaleString()}</p>
+                      <p className="font-medium">{formatUSD(Number(row.developer_earnings || 0))}</p>
                       <p className="text-sm text-gray-600">Status: {row.status}</p>
                     </div>
                   ))}

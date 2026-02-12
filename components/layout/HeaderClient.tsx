@@ -6,9 +6,10 @@ import { Menu, X } from 'lucide-react'
 
 type HeaderClientProps = {
   showAdmin: boolean
+  showDeveloperDashboard: boolean
 }
 
-export function HeaderClient({ showAdmin }: HeaderClientProps) {
+export function HeaderClient({ showAdmin, showDeveloperDashboard }: HeaderClientProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
@@ -29,9 +30,11 @@ export function HeaderClient({ showAdmin }: HeaderClientProps) {
             <Link href="/for-developers" className="text-gray-700 hover:text-primary-600 transition-colors">
               For Developers
             </Link>
-            <Link href="/developer" className="text-gray-700 hover:text-primary-600 transition-colors">
-              Developer Dashboard
-            </Link>
+            {showDeveloperDashboard && (
+              <Link href="/developer" className="text-gray-700 hover:text-primary-600 transition-colors">
+                Developer Dashboard
+              </Link>
+            )}
             <Link href="/how-it-works" className="text-gray-700 hover:text-primary-600 transition-colors">
               How It Works
             </Link>
@@ -75,9 +78,11 @@ export function HeaderClient({ showAdmin }: HeaderClientProps) {
               >
                 For Developers
               </Link>
-              <Link href="/developer" className="text-gray-700 hover:text-primary-600 py-2" onClick={() => setMobileMenuOpen(false)}>
-                Developer Dashboard
-              </Link>
+              {showDeveloperDashboard && (
+                <Link href="/developer" className="text-gray-700 hover:text-primary-600 py-2" onClick={() => setMobileMenuOpen(false)}>
+                  Developer Dashboard
+                </Link>
+              )}
               <Link href="/how-it-works" className="text-gray-700 hover:text-primary-600 py-2" onClick={() => setMobileMenuOpen(false)}>
                 How It Works
               </Link>
