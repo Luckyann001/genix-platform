@@ -1,0 +1,28 @@
+<svg width="900" height="1200" viewBox="0 0 900 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(450 600) rotate(90) scale(600 450)">
+      <stop stop-color="#111C53"/>
+      <stop offset="1" stop-color="#080D26"/>
+    </radialGradient>
+    <radialGradient id="ghost" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(430 560) rotate(90) scale(460 220)">
+      <stop stop-color="#6EA6FF" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#9AB8FF" stop-opacity="0.25"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="10" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="900" height="1200" fill="url(#bg)"/>
+  <ellipse cx="450" cy="1080" rx="160" ry="24" fill="#151C45"/>
+  <path d="M474 225C559 225 624 292 624 378C624 438 590 483 560 516C541 537 531 565 531 592V701C531 823 440 929 321 949C259 959 206 911 206 848C206 819 217 791 238 770C274 734 294 685 294 633V592C294 565 284 537 265 516C235 483 201 438 201 378C201 292 266 225 351 225H474Z" fill="url(#ghost)"/>
+  <path d="M358 356C386 332 424 332 452 356C424 386 386 386 358 356Z" fill="#CCF5FF" filter="url(#glow)"/>
+  <path d="M490 366L572 352L500 396L490 366Z" fill="#CCF5FF" filter="url(#glow)"/>
+  <rect x="404" y="436" width="92" height="10" rx="5" fill="#CCF5FF" filter="url(#glow)"/>
+  <path d="M444 160C473 126 481 90 467 64C503 95 510 141 472 188L444 160Z" fill="#81E4FF" filter="url(#glow)"/>
+  <path d="M520 588L688 568C706 566 719 583 714 601L692 686C689 698 678 707 666 708L495 723C479 724 466 711 468 695L478 609C480 598 489 590 500 589L520 588Z" fill="#29397B"/>
+  <path d="M548 639L574 616L612 626L587 652L548 639Z" fill="#72E9FF"/>
+</svg>

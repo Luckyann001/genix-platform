@@ -1,423 +1,407 @@
-# Genix Platform - Production-Ready Setup
+# Genix Platform
 
-> **A marketplace for production-ready websites built by professional developers**
+Genix is a marketplace for production-ready web templates where:
+- founders buy, customize, and launch quickly
+- developers submit and monetize templates
+- admins moderate templates, process refunds, and run payouts
 
-Built with Next.js 14, TypeScript, Tailwind CSS, Supabase, and Stripe.
+Built with Next.js 14 (App Router), TypeScript, Supabase, Paystack, and optional OpenAI-powered assistants.
 
----
+## Table of Contents
+1. Overview
+2. Current Feature Set
+3. Tech Stack
+4. Project Structure
+5. Prerequisites
+6. Local Setup
+7. Environment Variables
+8. Supabase Setup
+9. Paystack Setup
+10. Admin Setup
+11. AI Setup (Optional)
+12. Running the App
+13. User Flows
+14. API Surface (High-Level)
+15. Database Model
+16. Deployment Checklist
+17. Troubleshooting
+18. Scripts
+19. Notes and Known Gaps
 
-## 🚀 Quick Start
+## Overview
+Genix provides:
+- template marketplace browsing and details
+- developer template submission and moderation flow
+- purchase checkout via Paystack
+- webhook-based payment confirmation
+- consultation booking scaffolding with fee split
+- payout operations dashboards
+- refund request flow with admin approval/rejection
+- AI assistants for moderation, discovery, support, launch guidance, and submission copy
 
-### 1. Install Dependencies
+## Current Feature Set
+- Landing pages and trust pages:
+  - `app/page.tsx`
+  - `app/how-it-works/page.tsx`
+  - `app/trust/*`
+- Marketplace and template details:
+  - `app/templates/page.tsx`
+  - `app/templates/[slug]/page.tsx`
+  - `components/templates/*`
+- Auth entry and role-oriented login UI:
+  - `app/login/page.tsx`
+  - `app/login/LoginClient.tsx`
+- Developer portal:
+  - `app/developer/page.tsx`
+  - `app/developer/earnings/page.tsx`
+  - `app/developer/payout-settings/page.tsx`
+  - `app/developer/payout-history/page.tsx`
+- Template submission:
+  - `app/submit/page.tsx`
+  - `components/submit/SubmitTemplateForm.tsx`
+  - `app/api/templates/route.ts`
+- Admin dashboards:
+  - `app/admin/page.tsx`
+  - `app/admin/templates/page.tsx`
+  - `app/admin/payouts/page.tsx`
+  - `app/admin/refunds/page.tsx`
+- Payments and webhooks:
+  - `app/api/checkout/create-session/route.ts`
+  - `app/api/webhooks/paystack/route.ts`
+  - `app/api/paystack/callback/route.ts`
+  - `lib/paystack.ts`
+- AI routes:
+  - `app/api/ai/*`
+  - `app/api/developer/submissions/ai-assist/route.ts`
+  - `app/api/admin/templates/[id]/ai-review/route.ts`
+  - `app/api/admin/refunds/[id]/ai-review/route.ts`
 
+## Tech Stack
+- Framework: Next.js 14 App Router
+- Language: TypeScript
+- UI: React 18 + Tailwind CSS
+- Auth + DB: Supabase
+- Payments: Paystack
+- AI: OpenAI-compatible Chat Completions API (optional)
+- Icons/Animation: lucide-react, framer-motion
+
+## Project Structure
+```txt
+app/
+  api/
+    admin/
+    ai/
+    auth/
+    checkout/
+    consultations/
+    developer/
+    notifications/
+    profile/
+    purchases/
+    refunds/
+    support/
+    templates/
+    webhooks/
+  admin/
+  developer/
+  templates/
+  customize/
+  launch-assistant/
+  login/
+components/
+  admin/
+  developer/
+  founder/
+  home/
+  layout/
+  submit/
+  template-detail/
+  templates/
+lib/
+  admin-auth.ts
+  api-response.ts
+  currency.ts
+  llm.ts
+  paystack.ts
+  require-admin.ts
+  require-auth.ts
+  supabase/server.ts
+  templates.ts
+supabase/
+  migrations/
+public/
+  brand/
+```
+
+## Prerequisites
+- Node.js 18+
+- npm
+- Supabase project
+- Paystack account
+- OpenAI API key (optional)
+
+## Local Setup
+1. Install dependencies.
 ```bash
 npm install
 ```
 
-### 2. Set Up Environment Variables
-
-Copy `.env.example` to `.env.local`:
-
+2. Create local environment file.
 ```bash
-cp .env.example .env.local
+cp .env.local.example .env.local
 ```
+If `.env.local.example` does not exist in your clone, create `.env.local` manually using the keys listed below.
 
-Fill in your credentials:
+3. Run database migration SQL in Supabase SQL Editor:
+- `supabase/migrations/20260212_mvp_phase2.sql`
 
-```env
-# Supabase (create at supabase.com)
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-
-# GitHub OAuth (create at github.com/settings/developers)
-GITHUB_CLIENT_ID=your_github_client_id
-GITHUB_CLIENT_SECRET=your_github_client_secret
-
-# Stripe (create at stripe.com)
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-
-# App URL
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
-
-### 3. Run Development Server
-
+4. Start dev server.
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+5. Open:
+- `http://localhost:3000`
 
----
+## Environment Variables
+The application currently reads these variables in code:
 
-## 📁 Project Structure
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (or `SUPABASE_PRIVATE_KEY`)
+- `NEXT_PUBLIC_APP_URL`
+- `PAYSTACK_SECRET_KEY`
+- `ADMIN_EMAILS`
+- `OPENAI_API_KEY` (optional)
+- `OPENAI_API_URL` (optional override)
+- `OPENAI_MODEL` (optional override)
 
-```
-genix-platform/
-├── app/                          # Next.js 14 App Router
-│   ├── layout.tsx               # Root layout with Header/Footer
-│   ├── page.tsx                 # Homepage
-│   ├── globals.css              # Global styles
-│   ├── marketplace/
-│   │   └── page.tsx            # Marketplace listing page
-│   ├── template/
-│   │   └── [id]/
-│   │       └── page.tsx        # Template detail page
-│   ├── for-developers/
-│   │   └── page.tsx            # Developer landing page
-│   ├── trust/
-│   │   ├── code-ownership/
-│   │   ├── how-previews-work/
-│   │   ├── customization/
-│   │   └── support/            # Trust pages
-│   └── api/
-│       ├── templates/          # Template CRUD
-│       ├── checkout/           # Stripe integration
-│       └── webhooks/           # Stripe webhooks
-│
-├── components/
-│   ├── layout/
-│   │   ├── Header.tsx          # Global header with nav
-│   │   └── Footer.tsx          # Global footer
-│   ├── home/
-│   │   ├── Hero.tsx            # Homepage hero section
-│   │   ├── HowItWorks.tsx      # 4-step process
-│   │   ├── WhyNotAI.tsx        # Comparison table
-│   │   ├── ForFounders.tsx     # Founder benefits
-│   │   ├── ForDevelopers.tsx   # Developer benefits
-│   │   ├── TrustStrip.tsx      # Trust indicators
-│   │   └── CTA.tsx             # Final CTA section
-│   ├── marketplace/
-│   │   ├── MarketplaceHero.tsx
-│   │   ├── MarketplaceFilters.tsx
-│   │   └── TemplateGrid.tsx
-│   └── ui/                      # Reusable UI components
-│
-├── lib/
-│   ├── supabase.ts             # Supabase client
-│   ├── stripe.ts               # Stripe client
-│   └── utils.ts                # Utility functions
-│
-├── public/
-│   ├── genix-logo.svg          # Your logo here
-│   └── genix-character.svg     # Your character here
-│
-├── tailwind.config.js          # Tailwind configuration
-├── tsconfig.json               # TypeScript configuration
-└── package.json                # Dependencies
-```
-
----
-
-## 🎨 Design System
-
-### Colors
-
-**Primary** (Blue):
-- 50-900 scale defined in Tailwind config
-- Use: CTA buttons, links, accents
-
-**Accent** (Purple):
-- 50-900 scale
-- Use: Secondary accents, highlights
-
-### Typography
-
-**Font Families:**
-- `font-sans` (Inter) - Body text
-- `font-display` (Clash Display) - Headings
-
-**Font Scales:**
-- Headings: `text-4xl` to `text-7xl`
-- Body: `text-base` to `text-xl`
-
-### Components
-
-**Buttons:**
-```tsx
-<button className="btn btn-primary">Primary</button>
-<button className="btn btn-secondary">Secondary</button>
-<button className="btn btn-ghost">Ghost</button>
-```
-
-**Cards:**
-```tsx
-<div className="card">Basic card</div>
-<div className="card card-hover">Hoverable card</div>
-```
-
-**Sections:**
-```tsx
-<section className="section">Full section</section>
-<section className="section-sm">Small section</section>
-```
-
----
-
-## 🗄️ Database Schema (Supabase)
-
-### Tables to Create
-
-#### `templates`
-```sql
-CREATE TABLE templates (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name TEXT NOT NULL,
-  description TEXT NOT NULL,
-  price INTEGER NOT NULL,
-  category TEXT NOT NULL,
-  github_url TEXT NOT NULL,
-  demo_url TEXT,
-  features TEXT[],
-  preview_data JSONB,
-  developer_id UUID REFERENCES auth.users(id),
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-#### `profiles`
-```sql
-CREATE TABLE profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users(id),
-  username TEXT UNIQUE,
-  full_name TEXT,
-  avatar_url TEXT,
-  verified BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-#### `purchases`
-```sql
-CREATE TABLE purchases (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  template_id UUID REFERENCES templates(id),
-  buyer_id UUID REFERENCES auth.users(id),
-  price INTEGER NOT NULL,
-  stripe_payment_id TEXT,
-  status TEXT DEFAULT 'pending',
-  created_at TIMESTAMP DEFAULT NOW()
-);
-```
-
----
-
-## 💳 Stripe Integration
-
-### Setup
-
-1. Create Stripe account at stripe.com
-2. Get API keys from Dashboard > Developers > API keys
-3. Add to `.env.local`
-4. Set up webhook endpoint in Stripe Dashboard
-
-### Webhook Events
-
-Listen for these events:
-- `checkout.session.completed` - Process successful purchase
-- `payment_intent.payment_failed` - Handle failed payments
-
----
-
-## 🔐 Authentication (GitHub OAuth)
-
-### Setup
-
-1. Go to GitHub Settings > Developer Settings > OAuth Apps
-2. Create new OAuth App:
-   - Homepage URL: `http://localhost:3000`
-   - Authorization callback URL: `http://localhost:3000/api/auth/callback`
-3. Copy Client ID and Client Secret to `.env.local`
-
----
-
-## 📦 Key Dependencies
-
-- **next**: 14.2.5 - React framework
-- **react**: 18.3.1 - UI library
-- **@supabase/supabase-js**: Database & auth
-- **stripe**: Payment processing
-- **framer-motion**: Animations
-- **lucide-react**: Icons
-- **tailwindcss**: Styling
-
----
-
-## 🚢 Deployment
-
-### Deploy to Vercel
-
-1. Push code to GitHub
-2. Import project in Vercel
-3. Add environment variables
-4. Deploy
-
-### Update Environment URLs
-
-In `.env.local`:
+Recommended `.env.local` template:
 ```env
-NEXT_PUBLIC_APP_URL=https://your-domain.vercel.app
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY
+
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+PAYSTACK_SECRET_KEY=sk_test_or_live_xxx
+
+# Comma-separated list of admin emails
+ADMIN_EMAILS=admin1@example.com,admin2@example.com
+
+# Optional AI
+OPENAI_API_KEY=sk-...
+OPENAI_API_URL=https://api.openai.com/v1/chat/completions
+OPENAI_MODEL=gpt-4o-mini
 ```
 
-In GitHub OAuth settings:
-- Homepage URL: `https://your-domain.vercel.app`
-- Callback URL: `https://your-domain.vercel.app/api/auth/callback`
+## Supabase Setup
+1. Create a project and copy URL + keys.
+2. Run migration SQL:
+- `supabase/migrations/20260212_mvp_phase2.sql`
+3. Ensure your core tables from previous phases exist:
+- `profiles`
+- `templates`
+- `purchases`
+- `notifications` (if used in your deployment)
+4. Verify new phase tables were created:
+- `consultations`
+- `payout_transfers`
+- `ai_customizations`
+- `team_workspaces`
+- `team_members`
+- `developer_api_keys`
+- `refund_requests`
 
-In Stripe webhook settings:
-- Endpoint URL: `https://your-domain.vercel.app/api/webhooks/stripe`
+## Paystack Setup
+1. Set `PAYSTACK_SECRET_KEY`.
+2. Configure webhook endpoint in Paystack dashboard:
+- `https://YOUR_DOMAIN/api/webhooks/paystack`
+3. Ensure checkout callback URL base (`NEXT_PUBLIC_APP_URL`) is correct.
 
----
+Relevant code:
+- Checkout initialization: `app/api/checkout/create-session/route.ts`
+- Webhook verification/handling: `app/api/webhooks/paystack/route.ts`
+- Callback verification flow: `app/api/paystack/callback/route.ts`
 
-## 🎯 Key Pages
+## Admin Setup
+Admin access is email-based.
 
-### Homepage (`/`)
-- Hero with value proposition
-- Trust strip
-- How it works (4 steps)
-- Why not AI/freelancers comparison
-- For founders section
-- For developers section
-- Final CTA
+1. Set `ADMIN_EMAILS` with comma-separated addresses.
+2. Sign in using one of those addresses.
+3. Admin routes become available and protected by:
+- `lib/admin-auth.ts`
+- `lib/require-admin.ts`
 
-### Marketplace (`/marketplace`)
-- Search and filters
-- Template grid with cards
-- Category filters
-- Price filters
-- Feature filters
+Admin pages:
+- `/admin`
+- `/admin/templates`
+- `/admin/payouts`
+- `/admin/refunds`
 
-### Template Detail (`/template/[id]`)
-- Interactive preview
-- What you can customize
-- What requires developer
-- Developer profile
-- Pricing and CTA
-- What you get after purchase
+## AI Setup (Optional)
+Set `OPENAI_API_KEY` to activate AI features.
 
-### For Developers (`/for-developers`)
-- Benefits of listing
-- Revenue model (70/30 split)
-- How to submit template
-- Code ownership guarantees
+If no key is set, most AI helpers return fallback outputs.
 
-### Trust Pages (`/trust/*`)
-- `/trust/code-ownership` - How we protect developer IP
-- `/trust/how-previews-work` - Technical explanation
-- `/trust/customization` - What buyers can/can't change
-- `/trust/support` - Support and refund policy
+AI-related modules/routes:
+- `lib/llm.ts`
+- `app/api/ai/customizations/route.ts`
+- `app/api/ai/discovery/route.ts`
+- `app/api/ai/recommendations/route.ts`
+- `app/api/ai/launch-assistant/route.ts`
+- `app/api/developer/submissions/ai-assist/route.ts`
+- `app/api/admin/templates/[id]/ai-review/route.ts`
+- `app/api/admin/refunds/[id]/ai-review/route.ts`
 
----
-
-## 🔧 Customization
-
-### Add Your Branding
-
-1. Replace logo: `public/genix-logo.svg`
-2. Replace character: `public/genix-character.svg`
-3. Update colors in `tailwind.config.js`:
-
-```js
-colors: {
-  primary: { /* your blue */ },
-  accent: { /* your purple */ },
-}
-```
-
-### Update Content
-
-All text is in component files. Key files to update:
-- `components/home/Hero.tsx` - Main headline
-- `components/home/HowItWorks.tsx` - Process steps
-- `components/home/WhyNotAI.tsx` - Comparison
-- `components/layout/Footer.tsx` - Footer links
-
----
-
-## 📊 Analytics Setup (Optional)
-
-### Add Plausible
-
-1. Sign up at plausible.io
-2. Add to `app/layout.tsx`:
-
-```tsx
-<Script
-  defer
-  data-domain="yourdomain.com"
-  src="https://plausible.io/js/script.js"
-/>
-```
-
----
-
-## 🐛 Troubleshooting
-
-### "Module not found" errors
+## Running the App
+Development:
 ```bash
-rm -rf node_modules package-lock.json
-npm install
+npm run dev
 ```
 
-### Supabase connection issues
-- Check URL and keys in `.env.local`
-- Ensure tables are created
-- Check RLS policies
-
-### Stripe webhook not working
-- Use Stripe CLI for local testing:
+Production build locally:
 ```bash
-stripe listen --forward-to localhost:3000/api/webhooks/stripe
+npm run build
+npm run start
 ```
 
----
+Lint:
+```bash
+npm run lint
+```
 
-## 📚 Next Steps
+## User Flows
+Founder flow:
+1. Browse templates at `/templates`.
+2. Open details `/templates/[slug]`.
+3. Click buy in `PurchaseCard`.
+4. Complete Paystack checkout.
+5. On `charge.success`, webhook updates purchase to `completed`.
+6. Buyer proceeds to customization/download/refund flows.
 
-### Must-Have Features for V1
+Developer flow:
+1. Sign in.
+2. Submit template at `/submit`.
+3. Template enters pending review (`preview_data.review_status = pending`).
+4. Admin approves/rejects.
+5. Approved templates become publicly visible.
 
-- [ ] Complete authentication flow
-- [ ] Template submission form for developers
-- [ ] Stripe checkout integration
-- [ ] Template preview renderer
-- [ ] Purchase confirmation emails
-- [ ] User dashboard
+Admin flow:
+1. Moderate templates at `/admin/templates`.
+2. Review and process payouts at `/admin/payouts`.
+3. Review refund requests at `/admin/refunds`.
 
-### Nice-to-Have for V2
+## API Surface (High-Level)
+Auth:
+- `GET /api/auth/google`
+- `GET /api/auth/github`
+- `GET /api/auth/callback`
+- `POST /api/auth/signout`
 
-- [ ] Template customization tool
-- [ ] Developer consulting booking
-- [ ] Review system
-- [ ] Search with Algolia
-- [ ] Analytics dashboard
+Templates + marketplace:
+- `GET /api/templates`
+- `POST /api/templates`
+- `GET /api/templates/search`
+- `GET /api/templates/[id]`
+- `PATCH /api/templates/[id]`
 
----
+Checkout + payments:
+- `POST /api/checkout/create-session`
+- `POST /api/webhooks/paystack`
+- `GET /api/paystack/callback`
 
-## 🤝 Contributing
+Admin:
+- `GET /api/admin/templates`
+- `POST /api/admin/templates/[id]/approve`
+- `POST /api/admin/templates/[id]/reject`
+- `POST /api/admin/templates/[id]/ai-review`
+- `POST /api/admin/payouts`
+- `GET /api/admin/refunds`
+- `POST /api/admin/refunds/[id]/approve`
+- `POST /api/admin/refunds/[id]/reject`
+- `POST /api/admin/refunds/[id]/ai-review`
 
-This is a private codebase, but if you're a developer:
+AI/future-feature scaffolds:
+- `POST /api/ai/customizations`
+- `POST /api/ai/discovery`
+- `POST /api/ai/recommendations`
+- `POST /api/ai/launch-assistant`
+- `POST /api/developer/submissions/ai-assist`
 
-1. Fork the repo
-2. Create feature branch
-3. Submit PR
+Other:
+- consultations, purchases, refunds, teams, support tickets/messages, profile, notifications, bookmarks, reviews, developer API keys.
 
----
+## Database Model
+Current schema is split across base schema + phase migrations.
 
-## 📄 License
+Most recent migration file:
+- `supabase/migrations/20260212_mvp_phase2.sql`
 
-Proprietary - All rights reserved
+Adds:
+- consultation booking records + payout status
+- payout transfer ledger
+- AI customization job tracking
+- team collaboration entities
+- developer API keys
+- refund request tracking + paystack refund metadata
+- profile payout fields
+- `updated_at` trigger helper
 
----
+## Deployment Checklist
+1. Add all environment variables in Vercel.
+2. Run latest SQL migration in Supabase production.
+3. Configure Paystack webhook to production URL.
+4. Configure `ADMIN_EMAILS` in production.
+5. Set correct `NEXT_PUBLIC_APP_URL`.
+6. Verify OAuth providers and redirect URLs in Supabase.
+7. Smoke test critical flows:
+- login
+- template submit
+- admin approve
+- checkout
+- webhook completion
+- refund request
 
-## 🆘 Support
+## Troubleshooting
+Template submission returns internal server error:
+- Check DB schema matches API expectations.
+- Confirm required columns exist in `templates` table.
+- Check server logs for returned DB error message.
 
-- Email: support@genix.so
-- Discord: [Join our community]
-- Docs: docs.genix.so
+AI submission assistant says unauthorized:
+- Usually invalid/missing `OPENAI_API_KEY`.
+- Re-check key in deployment env and redeploy.
 
----
+Webhook not updating purchases:
+- Verify Paystack webhook URL.
+- Verify `PAYSTACK_SECRET_KEY`.
+- Confirm signature verification is passing.
 
-Built with ❤️ by the Genix team
+Admin page not visible:
+- Ensure signed-in user email is listed in `ADMIN_EMAILS`.
+
+Developer dashboard link visibility:
+- Header currently shows it only for profiles with `user_type = developer` (and admins).
+
+## Scripts
+- `npm run dev` - run local dev server
+- `npm run build` - production build
+- `npm run start` - start production server
+- `npm run lint` - run ESLint
+
+## Notes and Known Gaps
+- Currency display has been migrated to USD in UI; ensure your business/payment settings align.
+- Some future-feature routes are scaffolds and may require additional product hardening before public launch.
+- Review and harden RLS policies in Supabase for production.
+- If you are using Supabase OAuth callback exchange flow, confirm your callback implementation matches your auth strategy.
+
+## Branding Assets
+Brand files are now under:
+- `public/brand/genix-character.svg`
+- `public/brand/genix-logo-mark.svg`
+- `public/brand/genix-logo-full.svg`
+
+Used by:
+- `components/layout/HeaderClient.tsx`
+- `components/home/Hero.tsx`
+- `app/layout.tsx`

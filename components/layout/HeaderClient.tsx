@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
+import Image from 'next/image'
 
 type HeaderClientProps = {
   showAdmin: boolean
@@ -17,10 +18,24 @@ export function HeaderClient({ showAdmin, showDeveloperDashboard }: HeaderClient
       <nav className="container-custom">
         <div className="flex items-center justify-between h-20">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg flex items-center justify-center text-white font-bold text-xl group-hover:scale-105 transition-transform">
-              G
+            <div className="w-10 h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+              <Image
+                src="/brand/genix-logo-mark.svg"
+                alt="Genix logo"
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
+                priority
+              />
             </div>
-            <span className="text-2xl font-display font-bold">Genix</span>
+            <Image
+              src="/brand/genix-logo-full.svg"
+              alt="Genix"
+              width={160}
+              height={48}
+              className="h-8 w-auto"
+              priority
+            />
           </Link>
 
           <div className="hidden lg:flex items-center gap-8">

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, Play } from 'lucide-react'
+import Image from 'next/image'
 
 export function Hero() {
   return (
@@ -55,6 +56,16 @@ export function Hero() {
         {/* Hero Visual */}
         <div className="mt-20 animate-scale-in" style={{ animationDelay: '0.4s' }}>
           <div className="relative">
+            <div className="absolute -top-16 right-8 z-10 hidden lg:block">
+              <Image
+                src="/brand/genix-character.svg"
+                alt="Genix character mascot"
+                width={220}
+                height={300}
+                className="h-auto w-[220px] drop-shadow-2xl"
+                priority
+              />
+            </div>
             {/* Browser mockup */}
             <div className="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
               {/* Browser chrome */}
