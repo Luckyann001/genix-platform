@@ -1,11 +1,12 @@
 import { NextRequest } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { errorResponse, serverErrorResponse, successResponse, unauthorizedResponse } from '@/lib/api-response'
 import { isAdminUser } from '@/lib/admin-auth'
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = createClient()
+  const adminSupabase = createAdminClient()
 
   const { data: authData } = await supabase.auth.getUser()
   const user = authData.user
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return errorResponse('Rejection reason is required')
     }
 
-    const { data: existing, error: fetchError } = await supabase
+    const { data: existing, error: fetchError } = await adminSupabase
       .from('templates')
       .select('id, name, developer_id, preview_data')
       .eq('id', id)
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       reviewed_by: user.id,
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await adminSupabase
       .from('templates')
       .update({
         preview_data: nextPreviewData,
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (error) throw error
 
     if (existing.developer_id) {
-      await supabase.from('notifications').insert({
+      await adminSupabase.from('notifications').insert({
         user_id: existing.developer_id,
         type: 'template_rejected',
         title: 'Template Review Feedback',

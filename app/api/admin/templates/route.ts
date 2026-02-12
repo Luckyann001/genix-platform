@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { errorResponse, serverErrorResponse, successResponse, unauthorizedResponse } from '@/lib/api-response'
 import { isAdminUser } from '@/lib/admin-auth'
 
@@ -18,6 +18,7 @@ function getReviewStatus(previewData: any): string {
 
 export async function GET(request: NextRequest) {
   const supabase = createClient()
+  const adminSupabase = createAdminClient()
 
   const { data: authData } = await supabase.auth.getUser()
   const user = authData.user
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const status = readStatusFilter(searchParams.get('status'))
 
-    const { data, error } = await supabase
+    const { data, error } = await adminSupabase
       .from('templates')
       .select(
         'id, name, category, price, created_at, updated_at, developer_id, demo_url, preview_data, developer:profiles!templates_developer_id_fkey(username, full_name, email)'

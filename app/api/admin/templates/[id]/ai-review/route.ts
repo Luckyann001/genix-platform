@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { isAdminUser } from '@/lib/admin-auth'
 import { errorResponse, serverErrorResponse, successResponse, unauthorizedResponse } from '@/lib/api-response'
 import { generateTemplateModerationSuggestion } from '@/lib/llm'
@@ -7,6 +7,7 @@ import { generateTemplateModerationSuggestion } from '@/lib/llm'
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = createClient()
+  const adminSupabase = createAdminClient()
 
   const { data: authData } = await supabase.auth.getUser()
   const user = authData.user
@@ -14,7 +15,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (!isAdminUser(user)) return unauthorizedResponse('Admin access required')
 
   try {
-    const { data: template, error } = await supabase
+    const { data: template, error } = await adminSupabase
       .from('templates')
       .select('id, name, description, category, price, demo_url')
       .eq('id', id)
