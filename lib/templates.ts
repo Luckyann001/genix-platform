@@ -113,7 +113,7 @@ export async function listMarketplaceTemplates(options: ListTemplatesOptions = {
     const supabase = createClient()
     const { data, error } = await supabase
       .from('templates')
-      .select('id, name, description, price, category, demo_url, preview_data, developer_id, created_at, published')
+      .select('id, slug, name, description, price, category, demo_url, preview_data, developer_id, created_at, published')
       .order('created_at', { ascending: false })
 
     if (error || !data || data.length === 0) {
@@ -143,6 +143,34 @@ export async function getMarketplaceTemplateBySlugOrId(slugOrId: string): Promis
   const templates = await listMarketplaceTemplates()
   const exact = templates.find((template) => template.id === slugOrId || template.slug === slugOrId)
   if (exact) return exact
+
+  // Fallback: direct lookup in case list query misses recent rows due cache/RLS edge-cases.
+  try {
+    const supabase = createClient()
+    const byId = await supabase
+      .from('templates')
+      .select('id, slug, name, description, price, category, demo_url, preview_data, developer_id, created_at, published')
+      .eq('id', slugOrId)
+      .maybeSingle()
+
+    if (byId.data && isTemplatePublic(byId.data)) {
+      const profileMap = await fetchProfilesById([String(byId.data.developer_id || '')].filter(Boolean))
+      return normalizeTemplate(byId.data, profileMap.get(String(byId.data.developer_id)))
+    }
+
+    const bySlug = await supabase
+      .from('templates')
+      .select('id, slug, name, description, price, category, demo_url, preview_data, developer_id, created_at, published')
+      .eq('slug', slugOrId)
+      .maybeSingle()
+
+    if (bySlug.data && isTemplatePublic(bySlug.data)) {
+      const profileMap = await fetchProfilesById([String(bySlug.data.developer_id || '')].filter(Boolean))
+      return normalizeTemplate(bySlug.data, profileMap.get(String(bySlug.data.developer_id)))
+    }
+  } catch (error) {
+    console.error('getMarketplaceTemplateBySlugOrId direct lookup failed:', error)
+  }
 
   return getCatalogTemplateBySlug(slugOrId)
 }

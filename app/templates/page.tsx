@@ -42,7 +42,8 @@ export default async function TemplatesPage({ searchParams }: TemplatesPageProps
 
   const templates = await listMarketplaceTemplates()
   const filtered = templates.filter((template) => {
-    const matchesCategory = category === 'all' || template.category === category
+    const matchesCategory =
+      category === 'all' || String(template.category || '').toLowerCase() === String(category || '').toLowerCase()
     const searchable = `${template.title} ${template.category} ${template.developer_name}`.toLowerCase()
     const matchesQuery = !query || searchable.includes(query)
     return matchesCategory && matchesQuery
