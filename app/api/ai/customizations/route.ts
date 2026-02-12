@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { errorResponse, serverErrorResponse, successResponse, unauthorizedResponse } from '@/lib/api-response'
+import { generateCustomizationPatch } from '@/lib/llm'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,17 +54,25 @@ export async function POST(request: NextRequest) {
       return errorResponse('templateId and prompt are required')
     }
 
-    // Contract: this scaffold stores AI customization requests and generated patch payloads.
-    const generatedPatch = {
-      colors: {
-        primary: '#0ea5e9',
-        accent: '#10b981',
-      },
-      content: {
-        hero_title: 'AI-updated hero copy',
-      },
-      sections: [],
+    let llmResult
+    try {
+      llmResult = await generateCustomizationPatch(prompt, currentConfig)
+    } catch (llmError) {
+      llmResult = {
+        patch: {
+          colors: {
+            primary: '#0ea5e9',
+            accent: '#10b981',
+          },
+          content: {
+            hero_title: 'AI fallback customization copy',
+          },
+          sections: [],
+        },
+        provider: 'fallback_error',
+      }
     }
+    const generatedPatch = llmResult.patch
 
     const { data, error } = await supabase
       .from('ai_customizations')
@@ -74,6 +83,7 @@ export async function POST(request: NextRequest) {
         input_config: currentConfig,
         generated_patch: generatedPatch,
         status: 'generated',
+        provider: llmResult.provider,
       })
       .select('*')
       .single()

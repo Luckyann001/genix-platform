@@ -156,3 +156,57 @@ drop trigger if exists team_workspaces_set_updated_at on public.team_workspaces;
 create trigger team_workspaces_set_updated_at
 before update on public.team_workspaces
 for each row execute function public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- Developer payout profile fields
+-- ---------------------------------------------------------------------------
+alter table if exists public.profiles add column if not exists bank_name text;
+alter table if exists public.profiles add column if not exists bank_account_name text;
+alter table if exists public.profiles add column if not exists bank_account_number text;
+alter table if exists public.profiles add column if not exists paystack_recipient_code text;
+alter table if exists public.profiles add column if not exists recipient_code text;
+alter table if exists public.profiles add column if not exists bank_recipient_code text;
+alter table if exists public.profiles add column if not exists transfer_recipient_code text;
+
+-- ---------------------------------------------------------------------------
+-- AI provider metadata
+-- ---------------------------------------------------------------------------
+alter table if exists public.ai_customizations add column if not exists provider text;
+
+-- ---------------------------------------------------------------------------
+-- Refunds and guarantee tracking
+-- ---------------------------------------------------------------------------
+alter table if exists public.purchases add column if not exists refund_status text;
+alter table if exists public.purchases add column if not exists refunded_at timestamptz;
+alter table if exists public.purchases add column if not exists refund_amount integer;
+alter table if exists public.purchases add column if not exists refund_reason text;
+
+create table if not exists public.refund_requests (
+  id uuid primary key default gen_random_uuid(),
+  purchase_id uuid not null references public.purchases(id) on delete cascade,
+  buyer_id uuid not null references auth.users(id),
+  seller_id uuid references auth.users(id),
+  amount integer not null,
+  reason text not null,
+  deployed boolean not null default false,
+  status text not null default 'pending',
+  admin_note text,
+  paystack_refund_reference text,
+  paystack_refund_response jsonb,
+  resolved_by uuid references auth.users(id),
+  resolved_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint refund_requests_status_check check (status in ('pending', 'approved', 'rejected', 'cancelled'))
+);
+
+alter table if exists public.refund_requests add column if not exists paystack_refund_reference text;
+alter table if exists public.refund_requests add column if not exists paystack_refund_response jsonb;
+
+create index if not exists refund_requests_buyer_idx on public.refund_requests (buyer_id, created_at desc);
+create index if not exists refund_requests_status_idx on public.refund_requests (status, created_at desc);
+
+drop trigger if exists refund_requests_set_updated_at on public.refund_requests;
+create trigger refund_requests_set_updated_at
+before update on public.refund_requests
+for each row execute function public.set_updated_at();

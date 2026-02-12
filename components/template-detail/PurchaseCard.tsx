@@ -76,6 +76,18 @@ export function PurchaseCard({ templateId, templateSlug, price }: PurchaseCardPr
           </Link>
         </div>
       )}
+
+      <p className="mt-3 text-xs text-gray-500">
+        30-day guarantee. Need help with a refund later? Visit{' '}
+        <Link href="/refunds" className="underline">
+          Refund Requests
+        </Link>{' '}
+        or plan your go-live with{' '}
+        <Link href="/launch-assistant" className="underline">
+          AI Launch Assistant
+        </Link>
+        .
+      </p>
     </div>
   )
 }

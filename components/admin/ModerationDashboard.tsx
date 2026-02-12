@@ -18,6 +18,14 @@ type TemplateRow = {
   created_at: string
 }
 
+type AiSuggestion = {
+  decision?: string
+  confidence?: number
+  reasons?: string[]
+  risks?: string[]
+  suggested_feedback?: string
+}
+
 const FILTERS = ['pending', 'approved', 'rejected', 'all'] as const
 
 export function ModerationDashboard() {
@@ -26,6 +34,8 @@ export function ModerationDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [busyId, setBusyId] = useState('')
+  const [aiBusyId, setAiBusyId] = useState('')
+  const [aiSuggestions, setAiSuggestions] = useState<Record<string, AiSuggestion>>({})
 
   async function loadData(nextFilter = filter) {
     setLoading(true)
@@ -91,6 +101,26 @@ export function ModerationDashboard() {
     }
   }
 
+  async function runAiReview(id: string) {
+    setAiBusyId(id)
+    setError('')
+
+    try {
+      const response = await fetch(`/api/admin/templates/${id}/ai-review`, {
+        method: 'POST',
+      })
+      const payload = await response.json()
+      if (!response.ok) throw new Error(payload?.error || 'AI review failed')
+
+      const suggestion = payload?.data?.suggestion?.result || {}
+      setAiSuggestions((prev) => ({ ...prev, [id]: suggestion }))
+    } catch (err: any) {
+      setError(err?.message || 'AI review failed')
+    } finally {
+      setAiBusyId('')
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
@@ -132,9 +162,32 @@ export function ModerationDashboard() {
                       Open demo URL
                     </a>
                   )}
+                  {aiSuggestions[template.id] && (
+                    <div className="mt-3 rounded border border-blue-200 bg-blue-50 p-3 text-sm">
+                      <p className="font-medium text-blue-900">
+                        AI suggestion: {aiSuggestions[template.id].decision || 'manual_review'}{' '}
+                        {typeof aiSuggestions[template.id].confidence === 'number' &&
+                          `(confidence ${(aiSuggestions[template.id].confidence! * 100).toFixed(0)}%)`}
+                      </p>
+                      {Array.isArray(aiSuggestions[template.id].reasons) && aiSuggestions[template.id].reasons!.length > 0 && (
+                        <p className="text-blue-800 mt-1">Reasons: {aiSuggestions[template.id].reasons!.join(', ')}</p>
+                      )}
+                      {aiSuggestions[template.id].suggested_feedback && (
+                        <p className="text-blue-800 mt-1">Suggested feedback: {aiSuggestions[template.id].suggested_feedback}</p>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => runAiReview(template.id)}
+                    disabled={aiBusyId === template.id}
+                  >
+                    {aiBusyId === template.id ? 'AI Reviewing...' : 'AI Review'}
+                  </button>
                   <button
                     type="button"
                     className="btn btn-primary"

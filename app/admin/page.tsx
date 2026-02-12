@@ -23,6 +23,11 @@ export default async function AdminPage() {
               <h2 className="text-2xl font-semibold mb-2">Payout Operations</h2>
               <p className="text-gray-600">Preview pending payouts and run developer payout batches.</p>
             </Link>
+
+            <Link href="/admin/refunds" className="card card-hover block">
+              <h2 className="text-2xl font-semibold mb-2">Refund Requests</h2>
+              <p className="text-gray-600">Approve or reject 30-day money-back requests.</p>
+            </Link>
           </div>
         </div>
       </section>

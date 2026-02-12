@@ -30,6 +30,41 @@ export async function verifyPayment(reference: string) {
   }
 }
 
+// Initiate a Paystack refund for a successful transaction.
+export async function initiateRefund(reference: string, amount: number, note?: string) {
+  try {
+    const secret = process.env.PAYSTACK_SECRET_KEY
+    if (!secret) {
+      throw new Error('PAYSTACK_SECRET_KEY is not configured')
+    }
+
+    const response = await fetch('https://api.paystack.co/refund', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${secret}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        transaction: reference,
+        amount: Math.round(amount * 100), // kobo
+        customer_note: note || undefined,
+        merchant_note: note || undefined,
+      }),
+    })
+
+    const payload = await response.json()
+
+    if (!response.ok || payload?.status === false) {
+      throw new Error(payload?.message || `Paystack refund failed with status ${response.status}`)
+    }
+
+    return payload?.data
+  } catch (error) {
+    console.error('Paystack refund error:', error)
+    throw error
+  }
+}
+
 // Calculate fees (30% platform fee)
 export function calculateFees(amount: number) {
   const platformFee = Math.round(amount * 0.30)

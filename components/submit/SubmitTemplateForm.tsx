@@ -12,6 +12,35 @@ export function SubmitTemplateForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitState, setSubmitState] = useState<SubmitState>({ type: 'idle', message: '' })
   const [needsAuth, setNeedsAuth] = useState(false)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState('')
+  const [repoUrl, setRepoUrl] = useState('')
+  const [aiListingCopy, setAiListingCopy] = useState<{ short_description?: string; long_description?: string } | null>(null)
+  const [aiChecklist, setAiChecklist] = useState<string[]>([])
+
+  async function handleAiAssist() {
+    setAiLoading(true)
+    setAiError('')
+    try {
+      const response = await fetch('/api/developer/submissions/ai-assist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          repoUrl,
+        }),
+      })
+      const payload = await response.json()
+      if (!response.ok) throw new Error(payload?.error || 'AI assist failed')
+
+      const result = payload?.data?.suggestion?.result || {}
+      setAiListingCopy(result?.listing_copy || null)
+      setAiChecklist(Array.isArray(result?.checklist) ? result.checklist : [])
+    } catch (error: any) {
+      setAiError(error?.message || 'AI assist failed')
+    } finally {
+      setAiLoading(false)
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -79,6 +108,47 @@ export function SubmitTemplateForm() {
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
+      <div className="card border-primary-200 bg-primary-50">
+        <h2 className="text-xl font-semibold mb-2">AI Submission Assistant</h2>
+        <p className="text-sm text-gray-700 mb-3">Generate listing copy and a quality checklist from your repo context.</p>
+        <div className="flex gap-2">
+          <input
+            className="input bg-white"
+            placeholder="https://github.com/username/repo"
+            value={repoUrl}
+            onChange={(e) => setRepoUrl(e.target.value)}
+          />
+          <button type="button" className="btn btn-secondary" onClick={handleAiAssist} disabled={aiLoading}>
+            {aiLoading ? 'Generating...' : 'Generate'}
+          </button>
+        </div>
+        {aiError && <p className="text-sm text-red-600 mt-3">{aiError}</p>}
+        {aiListingCopy && (
+          <div className="mt-3 text-sm text-gray-800 space-y-2">
+            {aiListingCopy.short_description && (
+              <p>
+                <strong>Suggested short description:</strong> {aiListingCopy.short_description}
+              </p>
+            )}
+            {aiListingCopy.long_description && (
+              <p>
+                <strong>Suggested long description:</strong> {aiListingCopy.long_description}
+              </p>
+            )}
+          </div>
+        )}
+        {aiChecklist.length > 0 && (
+          <div className="mt-3">
+            <p className="text-sm font-medium">Checklist</p>
+            <ul className="text-sm text-gray-700 mt-1 space-y-1">
+              {aiChecklist.map((item) => (
+                <li key={item}>- {item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
       {/* Basic Info */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Basic Information</h2>

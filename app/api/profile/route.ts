@@ -39,7 +39,14 @@ export async function PATCH(request: NextRequest) {
       github_username,
       portfolio_url,
       company_name,
-      avatar_url
+      avatar_url,
+      bank_name,
+      bank_account_number,
+      bank_account_name,
+      paystack_recipient_code,
+      recipient_code,
+      bank_recipient_code,
+      transfer_recipient_code
     } = body
     
     const updateData: any = {}
@@ -51,6 +58,13 @@ export async function PATCH(request: NextRequest) {
     if (portfolio_url !== undefined) updateData.portfolio_url = portfolio_url
     if (company_name !== undefined) updateData.company_name = company_name
     if (avatar_url !== undefined) updateData.avatar_url = avatar_url
+    if (bank_name !== undefined) updateData.bank_name = bank_name
+    if (bank_account_number !== undefined) updateData.bank_account_number = bank_account_number
+    if (bank_account_name !== undefined) updateData.bank_account_name = bank_account_name
+    if (paystack_recipient_code !== undefined) updateData.paystack_recipient_code = paystack_recipient_code
+    if (recipient_code !== undefined) updateData.recipient_code = recipient_code
+    if (bank_recipient_code !== undefined) updateData.bank_recipient_code = bank_recipient_code
+    if (transfer_recipient_code !== undefined) updateData.transfer_recipient_code = transfer_recipient_code
     
     const { data, error } = await supabase
       .from('profiles')
@@ -66,4 +80,3 @@ export async function PATCH(request: NextRequest) {
     return serverErrorResponse(error)
   }
 }
-

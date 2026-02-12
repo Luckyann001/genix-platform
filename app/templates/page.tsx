@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { FilterBar } from '@/components/templates/FilterBar'
 import { TemplateCardGrid } from '@/components/templates/TemplateCardGrid'
 import { Pagination } from '@/components/templates/Pagination'
+import { AiDiscoveryPanel } from '@/components/templates/AiDiscoveryPanel'
+import { SmartRecommendations } from '@/components/templates/SmartRecommendations'
 import { listMarketplaceTemplates } from '@/lib/templates'
 
 export const metadata: Metadata = {
@@ -70,6 +72,8 @@ export default async function TemplatesPage({ searchParams }: TemplatesPageProps
           )}
 
           <FilterBar selectedCategory={category} query={queryRaw} categories={categories} />
+          <AiDiscoveryPanel />
+          <SmartRecommendations />
           <TemplateCardGrid templates={pageItems} />
           <Pagination
             currentPage={safePage}
