@@ -4,7 +4,7 @@ import { errorResponse, serverErrorResponse, successResponse, unauthorizedRespon
 import { isAdminUser } from '@/lib/admin-auth'
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-	const { id } = await params
+  const { id } = await params
   const supabase = createClient()
 
   const { data: authData } = await supabase.auth.getUser()
@@ -14,7 +14,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   try {
     const body = await request.json().catch(() => ({}))
-    const note = String(body?.note || '').trim()
+    const reason = String(body?.reason || body?.note || '').trim()
+
+    if (!reason) {
+      return errorResponse('Rejection reason is required')
+    }
 
     const { data: existing, error: fetchError } = await supabase
       .from('templates')
@@ -30,8 +34,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const nextPreviewData = {
       ...previewData,
-      review_status: 'approved',
-      review_feedback: note || null,
+      review_status: 'rejected',
+      review_feedback: reason,
       reviewed_at: new Date().toISOString(),
       reviewed_by: user.id,
     }
@@ -50,16 +54,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (existing.developer_id) {
       await supabase.from('notifications').insert({
         user_id: existing.developer_id,
-        type: 'template_approved',
-        title: 'Template Approved',
-        message: `Your template "${existing.name}" has been approved and is now live.`,
+        type: 'template_rejected',
+        title: 'Template Review Feedback',
+        message: `Your template "${existing.name}" needs updates before approval.`,
         related_template_id: existing.id,
-        action_url: `/templates/${existing.id}`,
+        action_url: `/developers/submit`,
       })
     }
 
     return successResponse({
-      message: 'Template approved successfully',
+      message: 'Template rejected with feedback',
       template: data,
     })
   } catch (error) {

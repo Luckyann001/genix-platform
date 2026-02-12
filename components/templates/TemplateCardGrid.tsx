@@ -1,4 +1,4 @@
-import type { TemplateRecord } from '@/lib/template-catalog'
+import type { TemplateRecord } from '@/lib/templates'
 import { TemplateCard } from './TemplateCard'
 
 type TemplateCardGridProps = {

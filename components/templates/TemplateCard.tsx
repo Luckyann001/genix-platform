@@ -1,17 +1,30 @@
 import Link from 'next/link'
-import type { TemplateRecord } from '@/lib/template-catalog'
+import type { TemplateRecord } from '@/lib/templates'
 
 type TemplateCardProps = {
   template: TemplateRecord
 }
 
 export function TemplateCard({ template }: TemplateCardProps) {
+  const hasPreviewUrl = Boolean(template.live_preview_url && template.live_preview_url !== '#')
+
   return (
     <Link href={`/templates/${template.slug}`} className="card card-hover block">
-      <div className="aspect-video rounded-lg bg-gradient-to-br from-primary-100 to-accent-100 mb-4 overflow-hidden">
-        <div className="w-full h-full flex items-center justify-center">
-          <span className="text-sm text-gray-600">{template.title}</span>
-        </div>
+      <div className="aspect-video rounded-lg bg-gradient-to-br from-primary-100 to-accent-100 mb-4 overflow-hidden border border-gray-200">
+        {hasPreviewUrl ? (
+          <iframe
+            src={template.live_preview_url}
+            title={`${template.title} live preview`}
+            loading="lazy"
+            className="w-full h-full pointer-events-none"
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-sm text-gray-600">{template.title}</span>
+          </div>
+        )}
       </div>
 
       <div className="mb-3">
@@ -26,7 +39,7 @@ export function TemplateCard({ template }: TemplateCardProps) {
 
       <div className="pt-4 border-t border-gray-200 flex items-center justify-between">
         <span className="text-xs text-gray-500">{template.id}</span>
-        <span className="text-xl font-bold">${template.price}</span>
+        <span className="text-xl font-bold">₦{template.price.toLocaleString()}</span>
       </div>
     </Link>
   )

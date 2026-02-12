@@ -1,8 +1,16 @@
 "use client"
 
 import { Github } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
 
 export default function LoginClient() {
+  const searchParams = useSearchParams()
+  const role = searchParams.get('role') || ''
+  const next = searchParams.get('next') || '/templates'
+
+  const googleHref = `/api/auth/google?next=${encodeURIComponent(next)}`
+  const githubHref = `/api/auth/github?next=${encodeURIComponent(next)}`
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50 flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full">
@@ -13,7 +21,13 @@ export default function LoginClient() {
               G
             </div>
             <h1 className="text-3xl font-bold mb-2">Welcome to Genix</h1>
-            <p className="text-gray-600">Choose how you'd like to sign in</p>
+            <p className="text-gray-600">
+              {role === 'developer'
+                ? 'Sign in with GitHub to submit templates'
+                : role === 'founder'
+                  ? 'Sign in to continue buying templates'
+                  : "Choose how you'd like to sign in"}
+            </p>
           </div>
 
           <div className="space-y-4">
@@ -22,7 +36,7 @@ export default function LoginClient() {
               <p className="text-sm font-medium text-gray-700 mb-3">👔 For Founders & Buyers</p>
               <button
                 onClick={() => {
-                  window.location.href = '/api/auth/google'
+                  window.location.href = googleHref
                 }}
                 className="w-full btn bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-300 py-4 text-lg flex items-center justify-center gap-3"
               >
@@ -51,7 +65,7 @@ export default function LoginClient() {
               <p className="text-sm font-medium text-gray-700 mb-3">👨‍💻 For Developers</p>
               <button
                 onClick={() => {
-                  window.location.href = '/api/auth/github'
+                  window.location.href = githubHref
                 }}
                 className="w-full btn bg-gray-900 hover:bg-gray-800 text-white py-4 text-lg flex items-center justify-center gap-3"
               >

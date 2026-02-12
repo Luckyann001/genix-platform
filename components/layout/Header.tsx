@@ -33,6 +33,9 @@ export function Header() {
             <Link href="/trust" className="text-gray-700 hover:text-primary-600 transition-colors">
               Trust & Safety
             </Link>
+            <Link href="/admin" className="text-gray-700 hover:text-primary-600 transition-colors">
+              Admin
+            </Link>
           </div>
 
           {/* CTA Buttons */}
@@ -85,6 +88,13 @@ export function Header() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Trust & Safety
+              </Link>
+              <Link
+                href="/admin"
+                className="text-gray-700 hover:text-primary-600 py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Admin
               </Link>
               <div className="flex flex-col gap-3 pt-4 border-t border-gray-200">
                 <Link href="/login" className="btn btn-ghost w-full">

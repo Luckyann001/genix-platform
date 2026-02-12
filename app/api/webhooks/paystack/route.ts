@@ -21,10 +21,72 @@ export async function POST(request: NextRequest) {
   
   // Handle charge.success event
   if (event.event === 'charge.success') {
-    const { reference, metadata, amount, customer } = event.data
-    const { purchaseId, templateId, buyerId } = metadata
-    
-    // Update purchase
+    const { reference, metadata, amount } = event.data
+    const purchaseId = metadata?.purchaseId
+    const templateId = metadata?.templateId
+    const buyerId = metadata?.buyerId
+    const consultationId = metadata?.consultationId
+    const paymentType = String(metadata?.paymentType || metadata?.payment_type || '')
+
+    // Consultation payment success
+    if (consultationId || paymentType === 'consultation') {
+      const { data: consultation } = await supabase
+        .from('consultations')
+        .select('id, status, buyer_id, developer_id, amount')
+        .eq('id', consultationId)
+        .single()
+
+      if (!consultation) {
+        return NextResponse.json({ error: 'Consultation not found' }, { status: 404 })
+      }
+
+      if (consultation.status !== 'scheduled' && consultation.status !== 'completed') {
+        await supabase
+          .from('consultations')
+          .update({
+            status: 'scheduled',
+            payment_reference: reference,
+          })
+          .eq('id', consultation.id)
+      }
+
+      await supabase.from('notifications').insert([
+        {
+          user_id: consultation.buyer_id,
+          type: 'consultation_confirmed',
+          title: 'Consultation Confirmed',
+          message: 'Your consultation booking is confirmed.',
+          related_consultation_id: consultation.id,
+          action_url: `/dashboard/consultations`,
+        },
+        {
+          user_id: consultation.developer_id,
+          type: 'consultation_booked',
+          title: 'New Consultation Booking',
+          message: `You have a new paid consultation booking (₦${Number(consultation.amount || amount || 0).toLocaleString()}).`,
+          related_consultation_id: consultation.id,
+          action_url: `/dashboard/consultations`,
+        },
+      ])
+
+      return NextResponse.json({ received: true })
+    }
+
+    // Template purchase payment success
+    const { data: purchase } = await supabase
+      .from('purchases')
+      .select('id, status')
+      .eq('id', purchaseId)
+      .single()
+
+    if (!purchase) {
+      return NextResponse.json({ error: 'Purchase not found' }, { status: 404 })
+    }
+
+    if (purchase.status === 'completed') {
+      return NextResponse.json({ received: true })
+    }
+
     await supabase
       .from('purchases')
       .update({
@@ -32,24 +94,21 @@ export async function POST(request: NextRequest) {
         payment_reference: reference,
       })
       .eq('id', purchaseId)
-    
-    // Increment template purchase count
+
     await supabase.rpc('increment_template_purchases', {
       template_uuid: templateId
     })
-    
-    // Create notifications
+
     const { data: template } = await supabase
       .from('templates')
       .select('name, developer_id, price')
       .eq('id', templateId)
       .single()
-    
+
     if (!template || !template.name || !template.developer_id) {
       return NextResponse.json({ error: 'Template not found' }, { status: 404 })
     }
-    
-    // Notify buyer
+
     await supabase.from('notifications').insert({
       user_id: buyerId,
       type: 'purchase_confirmed',
@@ -59,8 +118,7 @@ export async function POST(request: NextRequest) {
       related_purchase_id: purchaseId,
       action_url: `/customize/${templateId}?purchase=${purchaseId}`
     })
-    
-    // Notify developer
+
     const developerEarnings = Math.round(amount * 0.70 / 100) // 70% in naira
     await supabase.from('notifications').insert({
       user_id: template.developer_id,

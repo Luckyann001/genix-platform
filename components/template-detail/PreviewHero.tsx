@@ -1,12 +1,15 @@
 import Link from 'next/link'
 import { ExternalLink } from 'lucide-react'
-import type { TemplateRecord } from '@/lib/template-catalog'
+import type { TemplateRecord } from '@/lib/templates'
+import { PurchaseCard } from '@/components/template-detail/PurchaseCard'
 
 type PreviewHeroProps = {
   template: TemplateRecord
 }
 
 export function PreviewHero({ template }: PreviewHeroProps) {
+  const hasPreviewUrl = Boolean(template.live_preview_url && template.live_preview_url !== '#')
+
   return (
     <section className="section-sm bg-white">
       <div className="container-custom">
@@ -34,13 +37,23 @@ export function PreviewHero({ template }: PreviewHeroProps) {
           </div>
 
           <div className="card">
-            <div className="aspect-video rounded-lg bg-gradient-to-br from-primary-100 to-accent-100 mb-4 flex items-center justify-center">
-              <span className="text-sm text-gray-600">Screenshot: {template.preview_image}</span>
+            <div className="aspect-video rounded-lg bg-gradient-to-br from-primary-100 to-accent-100 mb-4 overflow-hidden border border-gray-200">
+              {hasPreviewUrl ? (
+                <iframe
+                  src={template.live_preview_url}
+                  title={`${template.title} preview`}
+                  loading="lazy"
+                  className="w-full h-full"
+                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-sm text-gray-600">{template.title}</span>
+                </div>
+              )}
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-600">One-time price</span>
-              <span className="text-3xl font-bold">${template.price}</span>
-            </div>
+            <PurchaseCard templateId={template.id} templateSlug={template.slug} price={template.price} />
           </div>
         </div>
       </div>

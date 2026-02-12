@@ -1,13 +1,10 @@
-import { listTemplateCategories } from '@/lib/template-catalog'
-
 type FilterBarProps = {
   selectedCategory?: string
   query?: string
+  categories?: string[]
 }
 
-export function FilterBar({ selectedCategory = 'all', query = '' }: FilterBarProps) {
-  const categories = listTemplateCategories()
-
+export function FilterBar({ selectedCategory = 'all', query = '', categories = [] }: FilterBarProps) {
   return (
     <form className="card mb-6" method="GET" action="/templates">
       <div className="grid md:grid-cols-3 gap-4">

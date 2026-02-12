@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { getTemplateBySlug } from '@/lib/template-catalog'
+import { getMarketplaceTemplateBySlugOrId } from '@/lib/templates'
 import { PreviewHero } from '@/components/template-detail/PreviewHero'
 import { CapabilityMap } from '@/components/template-detail/CapabilityMap'
 
@@ -11,7 +11,7 @@ type TemplateDetailPageProps = {
 }
 
 export async function generateMetadata({ params }: TemplateDetailPageProps): Promise<Metadata> {
-  const template = getTemplateBySlug(params.slug)
+  const template = await getMarketplaceTemplateBySlugOrId(params.slug)
   if (!template) {
     return {
       title: 'Template Not Found | Genix',
@@ -24,8 +24,8 @@ export async function generateMetadata({ params }: TemplateDetailPageProps): Pro
   }
 }
 
-export default function TemplateDetailPage({ params }: TemplateDetailPageProps) {
-  const template = getTemplateBySlug(params.slug)
+export default async function TemplateDetailPage({ params }: TemplateDetailPageProps) {
+  const template = await getMarketplaceTemplateBySlugOrId(params.slug)
 
   if (!template) {
     notFound()
