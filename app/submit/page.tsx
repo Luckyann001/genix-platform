@@ -2,13 +2,16 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { ArrowLeft } from 'lucide-react'
 import { SubmitTemplateForm } from '@/components/submit/SubmitTemplateForm'
+import { requireDeveloper } from '@/lib/require-developer'
 
 export const metadata: Metadata = {
   title: 'Submit Template | Genix',
   description: 'Submit your Next.js template to Genix marketplace',
 }
 
-export default function SubmitTemplatePage() {
+export default async function SubmitTemplatePage() {
+  await requireDeveloper('/developers/submit')
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container-custom py-12">

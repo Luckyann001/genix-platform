@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { requireAuth } from '@/lib/require-auth'
+import { requireDeveloper } from '@/lib/require-developer'
 import { formatUSD } from '@/lib/currency'
 
 export const dynamic = 'force-dynamic'
 
 export default async function DeveloperPayoutHistoryPage() {
-  const user = await requireAuth('/developer/payout-history')
+  const user = await requireDeveloper('/developer/payout-history')
   const supabase = createClient()
 
   const { data, error } = await supabase

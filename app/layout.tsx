@@ -8,16 +8,10 @@ export const metadata: Metadata = {
   description: 'Buy production-ready websites built by professional developers. Preview, customize, and launch without gambling on AI or freelancers.',
   keywords: ['website templates', 'nextjs templates', 'developer marketplace', 'production websites'],
   authors: [{ name: 'Genix' }],
-  icons: {
-    icon: '/brand/genix-logo-mark.svg',
-    shortcut: '/brand/genix-logo-mark.svg',
-    apple: '/brand/genix-logo-mark.svg',
-  },
   openGraph: {
     title: 'Genix - Production-Ready Websites by Real Developers',
     description: 'Buy production-ready websites built by professional developers.',
     type: 'website',
-    images: ['/brand/genix-logo-full.svg'],
   },
 }
 

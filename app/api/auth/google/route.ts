@@ -14,12 +14,13 @@ export async function GET(request: NextRequest) {
   const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
   const { searchParams } = new URL(request.url)
   const next = normalizeNextPath(searchParams.get('next'))
+  const role = 'buyer'
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${appUrl}/api/auth/callback?next=${encodeURIComponent(next)}`,
+      redirectTo: `${appUrl}/api/auth/callback?next=${encodeURIComponent(next)}&role=${role}`,
       queryParams: {
         access_type: 'offline',
         prompt: 'consent',

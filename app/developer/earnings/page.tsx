@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { requireAuth } from '@/lib/require-auth'
+import { requireDeveloper } from '@/lib/require-developer'
 import { formatUSD } from '@/lib/currency'
 
 export const dynamic = 'force-dynamic'
@@ -10,7 +10,7 @@ function sumBy(rows: any[], key: string) {
 }
 
 export default async function DeveloperEarningsPage() {
-  const user = await requireAuth('/developer/earnings')
+  const user = await requireDeveloper('/developer/earnings')
   const supabase = createClient()
 
   const [purchasesResult, consultationsResult, payoutsResult] = await Promise.all([

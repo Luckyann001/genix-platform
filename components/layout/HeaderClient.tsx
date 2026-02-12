@@ -3,39 +3,26 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
-import Image from 'next/image'
 
 type HeaderClientProps = {
-  showAdmin: boolean
+  isSignedIn: boolean
   showDeveloperDashboard: boolean
 }
 
-export function HeaderClient({ showAdmin, showDeveloperDashboard }: HeaderClientProps) {
+export function HeaderClient({ isSignedIn, showDeveloperDashboard }: HeaderClientProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  async function handleSignOut() {
+    await fetch('/api/auth/signout', { method: 'POST' })
+    window.location.href = '/'
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-200">
       <nav className="container-custom">
         <div className="flex items-center justify-between h-20">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
-              <Image
-                src="/brand/genix-logo-mark.svg"
-                alt="Genix logo"
-                width={40}
-                height={40}
-                className="w-full h-full object-cover"
-                priority
-              />
-            </div>
-            <Image
-              src="/brand/genix-logo-full.svg"
-              alt="Genix"
-              width={160}
-              height={48}
-              className="h-8 w-auto"
-              priority
-            />
+            <span className="text-xl font-semibold text-gray-900">Marketplace</span>
           </Link>
 
           <div className="hidden lg:flex items-center gap-8">
@@ -56,17 +43,18 @@ export function HeaderClient({ showAdmin, showDeveloperDashboard }: HeaderClient
             <Link href="/trust" className="text-gray-700 hover:text-primary-600 transition-colors">
               Trust & Safety
             </Link>
-            {showAdmin && (
-              <Link href="/admin" className="text-gray-700 hover:text-primary-600 transition-colors">
-                Admin
-              </Link>
-            )}
           </div>
 
           <div className="hidden lg:flex items-center gap-4">
-            <Link href="/login" className="btn btn-ghost">
-              Sign In
-            </Link>
+            {isSignedIn ? (
+              <button type="button" onClick={handleSignOut} className="btn btn-ghost">
+                Sign Out
+              </button>
+            ) : (
+              <Link href="/login" className="btn btn-ghost">
+                Sign In
+              </Link>
+            )}
             <Link href="/templates" className="btn btn-primary">
               Browse Templates
             </Link>
@@ -104,15 +92,20 @@ export function HeaderClient({ showAdmin, showDeveloperDashboard }: HeaderClient
               <Link href="/trust" className="text-gray-700 hover:text-primary-600 py-2" onClick={() => setMobileMenuOpen(false)}>
                 Trust & Safety
               </Link>
-              {showAdmin && (
-                <Link href="/admin" className="text-gray-700 hover:text-primary-600 py-2" onClick={() => setMobileMenuOpen(false)}>
-                  Admin
-                </Link>
-              )}
               <div className="flex flex-col gap-3 pt-4 border-t border-gray-200">
-                <Link href="/login" className="btn btn-ghost w-full">
-                  Sign In
-                </Link>
+                {isSignedIn ? (
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    className="btn btn-ghost w-full"
+                  >
+                    Sign Out
+                  </button>
+                ) : (
+                  <Link href="/login" className="btn btn-ghost w-full">
+                    Sign In
+                  </Link>
+                )}
                 <Link href="/templates" className="btn btn-primary w-full">
                   Browse Templates
                 </Link>

@@ -49,7 +49,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (error) throw error
 
     if (existing.developer_id) {
-      await adminSupabase.from('notifications').insert({
+      const primaryNotification = await adminSupabase.from('notifications').insert({
         user_id: existing.developer_id,
         type: 'template_approved',
         title: 'Template Approved',
@@ -57,6 +57,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         related_template_id: existing.id,
         action_url: `/templates/${existing.id}`,
       })
+
+      if (primaryNotification.error) {
+        await adminSupabase.from('notifications').insert({
+          user_id: existing.developer_id,
+          type: 'template_approved',
+          title: 'Template Approved',
+          message: `Your template "${existing.name}" has been approved and is now live.`,
+        })
+      }
     }
 
     return successResponse({

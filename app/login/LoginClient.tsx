@@ -8,19 +8,15 @@ export default function LoginClient() {
   const role = searchParams.get('role') || ''
   const next = searchParams.get('next') || '/templates'
 
-  const googleHref = `/api/auth/google?next=${encodeURIComponent(next)}`
-  const githubHref = `/api/auth/github?next=${encodeURIComponent(next)}`
+  const googleHref = `/api/auth/google?role=buyer&next=${encodeURIComponent(next)}`
+  const githubHref = `/api/auth/github?role=developer&next=${encodeURIComponent(next)}`
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50 flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          {/* Logo */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-accent-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4">
-              G
-            </div>
-            <h1 className="text-3xl font-bold mb-2">Welcome to Genix</h1>
+            <h1 className="text-3xl font-bold mb-2">Welcome</h1>
             <p className="text-gray-600">
               {role === 'developer'
                 ? 'Sign in with GitHub to submit templates'

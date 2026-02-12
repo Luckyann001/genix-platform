@@ -53,7 +53,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (error) throw error
 
     if (existing.developer_id) {
-      await adminSupabase.from('notifications').insert({
+      const primaryNotification = await adminSupabase.from('notifications').insert({
         user_id: existing.developer_id,
         type: 'template_rejected',
         title: 'Template Review Feedback',
@@ -61,6 +61,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         related_template_id: existing.id,
         action_url: `/developers/submit`,
       })
+
+      if (primaryNotification.error) {
+        await adminSupabase.from('notifications').insert({
+          user_id: existing.developer_id,
+          type: 'template_rejected',
+          title: 'Template Review Feedback',
+          message: `Your template "${existing.name}" needs updates before approval.`,
+        })
+      }
     }
 
     return successResponse({

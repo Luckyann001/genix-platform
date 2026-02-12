@@ -9,10 +9,7 @@ export function Footer() {
           {/* Brand */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                G
-              </div>
-              <span className="text-2xl font-display font-bold">Genix</span>
+              <span className="text-2xl font-display font-bold">Template Marketplace</span>
             </Link>
             <p className="text-gray-600 max-w-sm mb-6">
               Production-ready websites built by professional developers. 
@@ -115,7 +112,7 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-gray-200">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-gray-600 text-sm">
-              © {new Date().getFullYear()} Genix. All rights reserved.
+              © {new Date().getFullYear()} Template Marketplace. All rights reserved.
             </p>
             <div className="flex items-center gap-6 text-sm">
               <Link href="/sitemap" className="text-gray-600 hover:text-primary-600 transition-colors">

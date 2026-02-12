@@ -1,11 +1,11 @@
 import Link from 'next/link'
-import { requireAuth } from '@/lib/require-auth'
+import { requireDeveloper } from '@/lib/require-developer'
 import { PayoutSettingsForm } from '@/components/developer/PayoutSettingsForm'
 
 export const dynamic = 'force-dynamic'
 
 export default async function DeveloperPayoutSettingsPage() {
-  await requireAuth('/developer/payout-settings')
+  await requireDeveloper('/developer/payout-settings')
 
   return (
     <div className="min-h-screen bg-gray-50">
