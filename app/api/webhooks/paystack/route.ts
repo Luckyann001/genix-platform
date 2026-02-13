@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     // Template purchase payment success
     const { data: purchase } = await supabase
       .from('purchases')
-      .select('id, status')
+      .select('id, status, purchase_mode')
       .eq('id', purchaseId)
       .single()
 
@@ -93,6 +93,7 @@ export async function POST(request: NextRequest) {
       .update({
         status: 'completed',
         payment_reference: reference,
+        launch_status: 'onboarding',
       })
       .eq('id', purchaseId)
 
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
 
     const { data: template } = await supabase
       .from('templates')
-      .select('name, developer_id, price')
+      .select('id, name, developer_id, price, preview_data')
       .eq('id', templateId)
       .single()
 
@@ -110,14 +111,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Template not found' }, { status: 404 })
     }
 
+    if (purchase.purchase_mode === 'exclusive') {
+      const previewData = template.preview_data && typeof template.preview_data === 'object' ? template.preview_data : {}
+      await supabase
+        .from('templates')
+        .update({
+          preview_data: {
+            ...previewData,
+            listing_status: 'unlisted',
+            sold_exclusive_at: new Date().toISOString(),
+            sold_exclusive_purchase_id: purchaseId,
+          },
+        })
+        .eq('id', templateId)
+    }
+
     await supabase.from('notifications').insert({
       user_id: buyerId,
       type: 'purchase_confirmed',
       title: 'Purchase Complete!',
-      message: `You now own ${template.name}. Start customizing!`,
+      message: `You now own ${template.name}. Complete onboarding and launch your live product.`,
       related_template_id: templateId,
       related_purchase_id: purchaseId,
-      action_url: `/customize/${templateId}?purchase=${purchaseId}`
+      action_url: `/launch/${purchaseId}`
     })
 
     const developerEarnings = Math.round(amount * 0.70 / 100)

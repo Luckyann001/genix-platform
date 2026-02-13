@@ -10,7 +10,10 @@ export async function POST(request: NextRequest) {
   if (!user) return unauthorizedResponse()
   
   try {
-    const { templateId } = await request.json()
+    const body = await request.json()
+    const templateId = String(body?.templateId || '')
+    const exclusivePurchase = Boolean(body?.exclusivePurchase)
+    const supportPackage = Boolean(body?.supportPackage)
     
     // Get template
     const { data: template, error: templateError } = await supabase
@@ -29,14 +32,32 @@ export async function POST(request: NextRequest) {
       .select('id')
       .eq('buyer_id', user.id)
       .eq('template_id', templateId)
-      .single()
+      .maybeSingle()
     
     if (existingPurchase) {
       return errorResponse('You already own this template', 400)
     }
     
+    if (exclusivePurchase && !template.exclusive_purchase_available) {
+      return errorResponse('Exclusive purchase is not available for this template', 400)
+    }
+
+    if (supportPackage && !template.support_package_available) {
+      return errorResponse('Support package is not available for this template', 400)
+    }
+
+    const basePrice = exclusivePurchase
+      ? Number(template.exclusive_price || 0)
+      : Number(template.price || 0)
+    const supportPrice = supportPackage ? Number(template.support_package_price || 0) : 0
+    const totalPrice = Math.round(basePrice + supportPrice)
+
+    if (!totalPrice || totalPrice <= 0) {
+      return errorResponse('Invalid purchase amount', 400)
+    }
+
     // Calculate fees
-    const fees = calculateTemplateFees(template.price)
+    const fees = calculateTemplateFees(totalPrice)
     
     // Create pending purchase
     const { data: purchase } = await supabase
@@ -45,7 +66,11 @@ export async function POST(request: NextRequest) {
         buyer_id: user.id,
         seller_id: template.developer_id,
         template_id: templateId,
-        price: template.price,
+        price: totalPrice,
+        base_price: Math.round(basePrice),
+        support_package: supportPackage,
+        purchase_mode: exclusivePurchase ? 'exclusive' : 'standard',
+        launch_status: 'onboarding',
         platform_fee: fees.platformFee,
         developer_earnings: fees.developerEarnings,
         status: 'pending'
@@ -56,11 +81,13 @@ export async function POST(request: NextRequest) {
     // Initialize Paystack payment
     const payment = await initializePayment(
       user.email!,
-      template.price,
+      totalPrice,
       {
         purchaseId: purchase.id,
         templateId: templateId,
         buyerId: user.id,
+        purchaseMode: exclusivePurchase ? 'exclusive' : 'standard',
+        supportPackage,
       }
     )
     

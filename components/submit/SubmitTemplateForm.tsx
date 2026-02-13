@@ -105,6 +105,10 @@ export function SubmitTemplateForm() {
       otherTools: String(formData.get('otherTools') || '').trim(),
       consultationAvailable: formData.get('consultationAvailable') === 'on',
       consultationRate: Number(formData.get('consultationRate') || 0),
+      exclusivePurchaseAvailable: formData.get('exclusivePurchaseAvailable') === 'on',
+      exclusivePrice: Number(formData.get('exclusivePrice') || 0),
+      supportPackageAvailable: formData.get('supportPackageAvailable') === 'on',
+      supportPackagePrice: Number(formData.get('supportPackagePrice') || 0),
     }
 
     try {
@@ -292,6 +296,34 @@ export function SubmitTemplateForm() {
               <input type="number" name="price" className="input pl-8" placeholder="299" min="1" required />
             </div>
             <p className="text-sm text-gray-500 mt-1">You&apos;ll receive 70% of sales revenue</p>
+          </div>
+
+          <div className="rounded-lg border border-slate-200 p-4 space-y-3">
+            <label className="flex items-center gap-2">
+              <input type="checkbox" name="exclusivePurchaseAvailable" className="rounded" />
+              <span className="text-sm font-medium">Offer exclusive buyout (auto-unlist after purchase)</span>
+            </label>
+            <div>
+              <label className="block text-sm font-medium mb-2">Exclusive Price (USD)</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                <input type="number" name="exclusivePrice" className="input pl-8" placeholder="1999" min="0" />
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-slate-200 p-4 space-y-3">
+            <label className="flex items-center gap-2">
+              <input type="checkbox" name="supportPackageAvailable" className="rounded" />
+              <span className="text-sm font-medium">Offer launch support package</span>
+            </label>
+            <div>
+              <label className="block text-sm font-medium mb-2">Support Package Price (USD)</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                <input type="number" name="supportPackagePrice" className="input pl-8" placeholder="299" min="0" />
+              </div>
+            </div>
           </div>
         </div>
       </div>

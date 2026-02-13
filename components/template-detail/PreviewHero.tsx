@@ -53,7 +53,15 @@ export function PreviewHero({ template }: PreviewHeroProps) {
                 </div>
               )}
             </div>
-            <PurchaseCard templateId={template.id} templateSlug={template.slug} price={template.price} />
+            <PurchaseCard
+              templateId={template.id}
+              templateSlug={template.slug}
+              price={template.price}
+              exclusivePurchaseAvailable={template.exclusive_purchase_available}
+              exclusivePrice={template.exclusive_price}
+              supportPackageAvailable={template.support_package_available}
+              supportPackagePrice={template.support_package_price}
+            />
           </div>
         </div>
       </div>

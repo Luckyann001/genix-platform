@@ -24,12 +24,12 @@ export async function GET(request: NextRequest) {
     const supabase = createClient()
     await supabase
       .from('purchases')
-      .update({ status: 'completed' })
+      .update({ status: 'completed', launch_status: 'onboarding' })
       .eq('id', purchaseId)
     
-    // Redirect to customization tool
+    // Redirect to managed launch flow
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/customize/${templateId}?purchase=${purchaseId}`
+      `${process.env.NEXT_PUBLIC_APP_URL}/launch/${purchaseId}?template=${templateId}`
     )
   } catch (error) {
     console.error('Callback error:', error)

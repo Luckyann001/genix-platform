@@ -8,12 +8,26 @@ type PurchaseCardProps = {
   templateId: string
   templateSlug: string
   price: number
+  exclusivePurchaseAvailable?: boolean
+  exclusivePrice?: number | null
+  supportPackageAvailable?: boolean
+  supportPackagePrice?: number | null
 }
 
-export function PurchaseCard({ templateId, templateSlug, price }: PurchaseCardProps) {
+export function PurchaseCard({
+  templateId,
+  templateSlug,
+  price,
+  exclusivePurchaseAvailable = false,
+  exclusivePrice = null,
+  supportPackageAvailable = false,
+  supportPackagePrice = null,
+}: PurchaseCardProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [needsAuth, setNeedsAuth] = useState(false)
+  const [exclusivePurchase, setExclusivePurchase] = useState(false)
+  const [supportPackage, setSupportPackage] = useState(false)
 
   async function handleBuyNow() {
     setLoading(true)
@@ -26,7 +40,7 @@ export function PurchaseCard({ templateId, templateSlug, price }: PurchaseCardPr
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ templateId }),
+        body: JSON.stringify({ templateId, exclusivePurchase, supportPackage }),
       })
 
       const payload = await response.json()
@@ -57,7 +71,42 @@ export function PurchaseCard({ templateId, templateSlug, price }: PurchaseCardPr
     <div className="card mt-4">
       <div className="flex items-center justify-between mb-3">
         <span className="text-gray-600">One-time access</span>
-        <span className="text-2xl font-bold">{formatUSD(price)}</span>
+        <span className="text-2xl font-bold">
+          {formatUSD(
+            (exclusivePurchase ? Number(exclusivePrice || price) : price) +
+              (supportPackage ? Number(supportPackagePrice || 0) : 0)
+          )}
+        </span>
+      </div>
+
+      <div className="space-y-2 mb-4">
+        {exclusivePurchaseAvailable && (
+          <label className="flex items-start gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              className="mt-1 rounded"
+              checked={exclusivePurchase}
+              onChange={(e) => setExclusivePurchase(e.target.checked)}
+            />
+            <span>
+              Exclusive buyout (auto-unlist): {formatUSD(Number(exclusivePrice || 0))}
+            </span>
+          </label>
+        )}
+
+        {supportPackageAvailable && (
+          <label className="flex items-start gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              className="mt-1 rounded"
+              checked={supportPackage}
+              onChange={(e) => setSupportPackage(e.target.checked)}
+            />
+            <span>
+              Add launch support package: +{formatUSD(Number(supportPackagePrice || 0))}
+            </span>
+          </label>
+        )}
       </div>
 
       <button type="button" className="btn btn-primary w-full" onClick={handleBuyNow} disabled={loading}>

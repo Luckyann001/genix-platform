@@ -35,6 +35,10 @@ export async function POST(request: NextRequest) {
     const category = String(payload?.category || '').trim().toLowerCase()
     const githubUrl = String(payload?.githubUrl || '').trim()
     const demoUrl = String(payload?.demoUrl || '').trim()
+    const exclusivePurchaseAvailable = Boolean(payload?.exclusivePurchaseAvailable)
+    const rawExclusivePrice = Number(payload?.exclusivePrice || 0)
+    const supportPackageAvailable = Boolean(payload?.supportPackageAvailable)
+    const rawSupportPackagePrice = Number(payload?.supportPackagePrice || 0)
     const features = Array.isArray(payload?.features)
       ? payload.features.map((feature: unknown) => String(feature).trim()).filter(Boolean)
       : []
@@ -47,6 +51,16 @@ export async function POST(request: NextRequest) {
     const { data: authData } = await supabase.auth.getUser()
     const developerId = authData.user?.id
     if (!developerId) return unauthorizedResponse()
+
+    const exclusivePrice =
+      exclusivePurchaseAvailable && !Number.isNaN(rawExclusivePrice) && rawExclusivePrice > 0
+        ? Math.round(rawExclusivePrice)
+        : null
+
+    const supportPackagePrice =
+      supportPackageAvailable && !Number.isNaN(rawSupportPackagePrice) && rawSupportPackagePrice > 0
+        ? Math.round(rawSupportPackagePrice)
+        : null
 
     const previewData = {
       summary: shortDescription || longDescription.slice(0, 160),
@@ -87,6 +101,10 @@ export async function POST(request: NextRequest) {
           features,
           preview_data: previewData,
           developer_id: developerId,
+          exclusive_purchase_available: exclusivePurchaseAvailable,
+          exclusive_price: exclusivePrice,
+          support_package_available: supportPackageAvailable,
+          support_package_price: supportPackagePrice,
         })
         .select('id, name, slug, category, price, created_at')
         .single()

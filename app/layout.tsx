@@ -1,7 +1,20 @@
 import type { Metadata } from 'next'
+import { Manrope, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
+
+const sansFont = Manrope({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+})
+
+const displayFont = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-display',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'Genix - Production-Ready Websites by Real Developers',
@@ -22,7 +35,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className={`${sansFont.variable} ${displayFont.variable}`}>
         <Header />
         <main className="min-h-screen">
           {children}

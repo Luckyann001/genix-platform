@@ -21,6 +21,11 @@ export type TemplateRecord = {
   summary: string
   capability_map: TemplateCapabilityMap
   published: boolean
+  source_repo_url?: string
+  exclusive_purchase_available?: boolean
+  exclusive_price?: number | null
+  support_package_available?: boolean
+  support_package_price?: number | null
 }
 
 const DEFAULT_CAPABILITY_MAP: TemplateCapabilityMap = {
@@ -71,6 +76,11 @@ function normalizeTemplate(row: any, developer: any): TemplateRecord {
     summary: String(previewData.summary || row?.summary || row?.description || 'Production-ready template.'),
     capability_map: capabilityMap,
     published: true,
+    source_repo_url: String(row?.github_url || ''),
+    exclusive_purchase_available: Boolean(row?.exclusive_purchase_available),
+    exclusive_price: row?.exclusive_price ? Number(row.exclusive_price) : null,
+    support_package_available: Boolean(row?.support_package_available),
+    support_package_price: row?.support_package_price ? Number(row.support_package_price) : null,
   }
 }
 
@@ -81,6 +91,10 @@ function templateReviewStatus(template: any): string {
 
 function isTemplatePublic(template: any): boolean {
   const status = templateReviewStatus(template)
+  const previewData = template?.preview_data && typeof template.preview_data === 'object' ? template.preview_data : {}
+  const listingStatus = String(previewData?.listing_status || '').toLowerCase()
+  if (listingStatus === 'unlisted') return false
+
   if (status) return status === 'approved'
 
   if (typeof template?.published === 'boolean') return template.published
@@ -133,7 +147,9 @@ export async function listMarketplaceTemplates(options: ListTemplatesOptions = {
       const supabase = createClient()
       const { data, error } = await supabase
         .from('templates')
-        .select('id, slug, name, description, price, category, demo_url, preview_data, developer_id, created_at, published')
+        .select(
+          'id, slug, name, description, price, category, demo_url, github_url, preview_data, developer_id, created_at, published, exclusive_purchase_available, exclusive_price, support_package_available, support_package_price'
+        )
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -151,7 +167,9 @@ export async function listMarketplaceTemplates(options: ListTemplatesOptions = {
         const adminSupabase = createAdminClient()
         const { data, error } = await adminSupabase
           .from('templates')
-          .select('id, slug, name, description, price, category, demo_url, preview_data, developer_id, created_at, published')
+          .select(
+            'id, slug, name, description, price, category, demo_url, github_url, preview_data, developer_id, created_at, published, exclusive_purchase_available, exclusive_price, support_package_available, support_package_price'
+          )
           .order('created_at', { ascending: false })
 
         if (!error) rows = data || []
@@ -191,7 +209,9 @@ export async function getMarketplaceTemplateBySlugOrId(slugOrId: string): Promis
     const lookupWithClient = async (supabase: any) => {
       const byId = await supabase
         .from('templates')
-        .select('id, slug, name, description, price, category, demo_url, preview_data, developer_id, created_at, published')
+        .select(
+          'id, slug, name, description, price, category, demo_url, github_url, preview_data, developer_id, created_at, published, exclusive_purchase_available, exclusive_price, support_package_available, support_package_price'
+        )
         .eq('id', slugOrId)
         .maybeSingle()
 
@@ -202,7 +222,9 @@ export async function getMarketplaceTemplateBySlugOrId(slugOrId: string): Promis
 
       const bySlug = await supabase
         .from('templates')
-        .select('id, slug, name, description, price, category, demo_url, preview_data, developer_id, created_at, published')
+        .select(
+          'id, slug, name, description, price, category, demo_url, github_url, preview_data, developer_id, created_at, published, exclusive_purchase_available, exclusive_price, support_package_available, support_package_price'
+        )
         .eq('slug', slugOrId)
         .maybeSingle()
 
