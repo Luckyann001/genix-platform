@@ -4,6 +4,8 @@ import { getMarketplaceTemplateBySlugOrId } from '@/lib/templates'
 import { PreviewHero } from '@/components/template-detail/PreviewHero'
 import { CapabilityMap } from '@/components/template-detail/CapabilityMap'
 
+export const dynamic = 'force-dynamic'
+
 type TemplateDetailPageProps = {
   params: {
     slug: string

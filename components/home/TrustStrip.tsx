@@ -17,15 +17,15 @@ export function TrustStrip() {
   ]
 
   return (
-    <section className="py-12 bg-primary-50 border-y border-primary-100">
+    <section className="py-12 bg-slate-900 border-y border-slate-800">
       <div className="container-custom">
         <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
           {trustPoints.map((point, index) => (
             <div key={index} className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary-600 text-white flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-cyan-500/20 text-cyan-300 flex items-center justify-center border border-cyan-500/30">
                 <point.icon size={20} />
               </div>
-              <span className="text-gray-900 font-medium">{point.text}</span>
+              <span className="text-slate-100 font-medium">{point.text}</span>
             </div>
           ))}
         </div>

@@ -22,12 +22,12 @@ export function HeaderClient({ isSignedIn, showDeveloperDashboard }: HeaderClien
       <nav className="container-custom">
         <div className="flex items-center justify-between h-20">
           <Link href="/" className="flex items-center gap-3 group">
-            <span className="text-xl font-semibold text-gray-900">Marketplace</span>
+            <span className="text-xl font-semibold text-gray-900">Genix</span>
           </Link>
 
           <div className="hidden lg:flex items-center gap-8">
             <Link href="/templates" className="text-gray-700 hover:text-primary-600 transition-colors">
-              Browse Templates
+              AI Launch Kits
             </Link>
             <Link href="/for-developers" className="text-gray-700 hover:text-primary-600 transition-colors">
               For Developers
@@ -56,7 +56,7 @@ export function HeaderClient({ isSignedIn, showDeveloperDashboard }: HeaderClien
               </Link>
             )}
             <Link href="/templates" className="btn btn-primary">
-              Browse Templates
+              Browse AI Kits
             </Link>
           </div>
 
@@ -72,7 +72,7 @@ export function HeaderClient({ isSignedIn, showDeveloperDashboard }: HeaderClien
           <div className="lg:hidden py-4 border-t border-gray-200 animate-fade-in">
             <div className="flex flex-col gap-4">
               <Link href="/templates" className="text-gray-700 hover:text-primary-600 py-2" onClick={() => setMobileMenuOpen(false)}>
-                Browse Templates
+                AI Launch Kits
               </Link>
               <Link
                 href="/for-developers"
@@ -107,7 +107,7 @@ export function HeaderClient({ isSignedIn, showDeveloperDashboard }: HeaderClien
                   </Link>
                 )}
                 <Link href="/templates" className="btn btn-primary w-full">
-                  Browse Templates
+                  Browse AI Kits
                 </Link>
               </div>
             </div>

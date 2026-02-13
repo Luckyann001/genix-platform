@@ -8,6 +8,23 @@ type SubmitState = {
   message: string
 }
 
+const PREVIEW_CONTRACT_SNIPPET = `window.addEventListener('message', (event) => {
+  const data = event?.data
+  if (!data || data.type !== 'GENIX_PREVIEW_CONFIG') return
+
+  const cfg = data.payload || {}
+  // Example mappings:
+  // cfg.brand.name
+  // cfg.theme.font_heading
+  // cfg.theme.font_body
+  // cfg.content.hero_title
+  // cfg.content.hero_subtitle
+  // cfg.assets.logo_url
+  // cfg.assets.hero_image_url
+  //
+  // Apply these values to your React state / CSS variables.
+})`
+
 export function SubmitTemplateForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitState, setSubmitState] = useState<SubmitState>({ type: 'idle', message: '' })
@@ -17,6 +34,18 @@ export function SubmitTemplateForm() {
   const [repoUrl, setRepoUrl] = useState('')
   const [aiListingCopy, setAiListingCopy] = useState<{ short_description?: string; long_description?: string } | null>(null)
   const [aiChecklist, setAiChecklist] = useState<string[]>([])
+  const [showContractModal, setShowContractModal] = useState(false)
+  const [copiedContract, setCopiedContract] = useState(false)
+
+  async function copyContractSnippet() {
+    try {
+      await navigator.clipboard.writeText(PREVIEW_CONTRACT_SNIPPET)
+      setCopiedContract(true)
+      window.setTimeout(() => setCopiedContract(false), 1200)
+    } catch (_error) {
+      setCopiedContract(false)
+    }
+  }
 
   async function handleAiAssist() {
     setAiLoading(true)
@@ -234,6 +263,19 @@ export function SubmitTemplateForm() {
               placeholder="https://demo.vercel.app"
               required
             />
+            <div className="mt-2 rounded-lg border border-amber-300 bg-amber-50 p-3">
+              <p className="text-sm text-amber-900">
+                Buyers can customize your live preview only if your deployed demo listens for the Genix preview message
+                contract.
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowContractModal(true)}
+                className="mt-2 text-sm font-medium text-amber-800 underline hover:text-amber-900"
+              >
+                View listener contract
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -366,6 +408,46 @@ export function SubmitTemplateForm() {
           We&apos;ll review your template within 24-48 hours and notify you via email.
         </p>
       </div>
+
+      {showContractModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 p-4 flex items-center justify-center">
+          <div className="w-full max-w-2xl rounded-xl bg-white border border-gray-200 shadow-xl">
+            <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Genix Live Preview Contract</h3>
+              <button
+                type="button"
+                onClick={() => setShowContractModal(false)}
+                className="text-sm text-gray-600 hover:text-gray-900"
+              >
+                Close
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <p className="text-sm text-gray-700">
+                Add this listener in your deployed demo app. Genix customizer sends this payload via `postMessage`.
+              </p>
+              <pre className="rounded-lg bg-gray-900 text-gray-100 text-xs p-4 overflow-x-auto">
+                <code>{PREVIEW_CONTRACT_SNIPPET}</code>
+              </pre>
+              <div className="text-sm text-gray-700">
+                Payload fields:
+                <div className="mt-1 font-mono text-xs">
+                  `brand.name`, `theme.font_heading`, `theme.font_body`, `content.hero_title`,
+                  `content.hero_subtitle`, `assets.logo_url`, `assets.hero_image_url`
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={copyContractSnippet} className="btn btn-secondary">
+                  {copiedContract ? 'Copied' : 'Copy Snippet'}
+                </button>
+                <button type="button" onClick={() => setShowContractModal(false)} className="btn btn-primary">
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   )
 }

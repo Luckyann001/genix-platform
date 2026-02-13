@@ -5,26 +5,26 @@ export function HowItWorks() {
     {
       icon: Search,
       number: '1',
-      title: 'Browse real developer-built sites',
-      description: 'Explore templates built by professional developers, organized by use case: SaaS, stores, portfolios.',
+      title: 'Pick your AI launch kit',
+      description: 'Choose a verified kit built for AI SaaS use cases and modern startup stacks.',
     },
     {
       icon: Eye,
       number: '2',
-      title: 'Preview & understand capabilities',
-      description: 'See exactly what you\'re getting with interactive previews and clear customization boundaries.',
+      title: 'Inspect live preview + boundaries',
+      description: 'See what is editable vs locked, then validate flow, UX, and launch readiness.',
     },
     {
       icon: Palette,
       number: '3',
-      title: 'Customize safely',
-      description: 'Change text, colors, images, and toggle sections without breaking code. Complex changes? Hire the creator.',
+      title: 'Customize your brand layer',
+      description: 'Update copy, fonts, and core images in the preview without touching backend logic.',
     },
     {
       icon: ShoppingCart,
       number: '4',
-      title: 'Buy + deploy with support',
-      description: 'Get repo access, deployment guide, and 30 days of support. Deploy to Vercel in minutes.',
+      title: 'Buy, deploy, and ship',
+      description: 'Get code access, deployment docs, and support paths so you can launch quickly and safely.',
     },
   ]
 
@@ -37,7 +37,7 @@ export function HowItWorks() {
             How Genix Works
           </h2>
           <p className="text-xl text-gray-600">
-            Four simple steps from discovery to deployment
+            A direct path from idea to production
           </p>
         </div>
 

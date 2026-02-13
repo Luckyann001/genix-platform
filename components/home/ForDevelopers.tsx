@@ -1,22 +1,22 @@
 import Link from 'next/link'
-import { DollarSign, Code2, Shield, ArrowRight } from 'lucide-react'
+import { DollarSign, Code2, ArrowRight, MessageSquareCode } from 'lucide-react'
 
 export function ForDevelopers() {
   const benefits = [
     {
       icon: DollarSign,
-      title: 'Turn side projects into income',
-      description: 'Earn 70% revenue from template sales + 85% from consulting bookings.',
+      title: 'Monetize serious infrastructure',
+      description: 'List production-grade AI SaaS kits and earn from sales plus post-purchase support work.',
     },
     {
       icon: Code2,
-      title: 'You keep full ownership',
-      description: 'Your code stays yours. List anywhere. No exclusivity required.',
+      title: 'Keep ownership and distribution freedom',
+      description: 'You keep your IP and can still distribute elsewhere. Genix is not an exclusivity lock.',
     },
     {
-      icon: Shield,
-      title: 'We never execute your code',
-      description: 'Genix reads structure only. Your logic, APIs, and secrets stay private.',
+      icon: MessageSquareCode,
+      title: 'Preview contract for buyer edits',
+      description: 'Implement the postMessage listener once to support text, font, and image customization in preview.',
     },
   ]
 
@@ -50,11 +50,10 @@ export function ForDevelopers() {
               For Developers
             </div>
             <h2 className="text-4xl lg:text-5xl font-display font-bold mb-6">
-              Monetize your real work
+              Supply the infrastructure layer
             </h2>
             <p className="text-xl text-gray-600 mb-8">
-              You build great projects. We help you sell them. Keep ownership, 
-              earn passively, and get consulting gigs.
+              Genix is founder-first demand with curated developer supply. High quality kits get visibility.
             </p>
 
             <div className="space-y-6 mb-8">
@@ -73,7 +72,7 @@ export function ForDevelopers() {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/for-developers" className="btn btn-primary">
-                Learn More
+                Read Developer Guide
                 <ArrowRight size={20} />
               </Link>
               <Link href="/submit" className="btn btn-secondary">

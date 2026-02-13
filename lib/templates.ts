@@ -1,7 +1,6 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 import {
   getTemplateBySlug as getCatalogTemplateBySlug,
-  listPublishedTemplates as listCatalogTemplates,
 } from '@/lib/template-catalog'
 
 export type TemplateCapabilityMap = {
@@ -91,15 +90,32 @@ function isTemplatePublic(template: any): boolean {
 async function fetchProfilesById(ids: string[]) {
   if (ids.length === 0) return new Map<string, any>()
 
-  const supabase = createClient()
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, username, full_name, bio, email')
-    .in('id', ids)
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, username, full_name, bio, email')
+      .in('id', ids)
 
-  if (error || !data) return new Map<string, any>()
+    if (!error && data && data.length > 0) {
+      return new Map<string, any>(data.map((profile) => [String(profile.id), profile]))
+    }
+  } catch (_error) {
+    // Fall through to admin client fallback.
+  }
 
-  return new Map<string, any>(data.map((profile) => [String(profile.id), profile]))
+  try {
+    const adminSupabase = createAdminClient()
+    const { data, error } = await adminSupabase
+      .from('profiles')
+      .select('id, username, full_name, bio, email')
+      .in('id', ids)
+
+    if (error || !data) return new Map<string, any>()
+    return new Map<string, any>(data.map((profile) => [String(profile.id), profile]))
+  } catch (_error) {
+    return new Map<string, any>()
+  }
 }
 
 type ListTemplatesOptions = {
@@ -110,17 +126,43 @@ export async function listMarketplaceTemplates(options: ListTemplatesOptions = {
   const includeUnapproved = Boolean(options.includeUnapproved)
 
   try {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from('templates')
-      .select('id, slug, name, description, price, category, demo_url, preview_data, developer_id, created_at, published')
-      .order('created_at', { ascending: false })
+    let rows: any[] = []
+    let shouldTryAdminFallback = false
 
-    if (error || !data || data.length === 0) {
-      return listCatalogTemplates()
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('templates')
+        .select('id, slug, name, description, price, category, demo_url, preview_data, developer_id, created_at, published')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        shouldTryAdminFallback = true
+      } else {
+        rows = data || []
+        if (rows.length === 0) shouldTryAdminFallback = true
+      }
+    } catch (_error) {
+      shouldTryAdminFallback = true
     }
 
-    const selected = includeUnapproved ? data : data.filter((template) => isTemplatePublic(template))
+    if (shouldTryAdminFallback) {
+      try {
+        const adminSupabase = createAdminClient()
+        const { data, error } = await adminSupabase
+          .from('templates')
+          .select('id, slug, name, description, price, category, demo_url, preview_data, developer_id, created_at, published')
+          .order('created_at', { ascending: false })
+
+        if (!error) rows = data || []
+      } catch (_error) {
+        // Return empty list below if admin fallback is unavailable.
+      }
+    }
+
+    if (rows.length === 0) return []
+
+    const selected = includeUnapproved ? rows : rows.filter((template) => isTemplatePublic(template))
 
     const developerIds = Array.from(
       new Set(
@@ -134,8 +176,8 @@ export async function listMarketplaceTemplates(options: ListTemplatesOptions = {
 
     return selected.map((template) => normalizeTemplate(template, profileMap.get(String(template.developer_id))))
   } catch (error) {
-    console.error('listMarketplaceTemplates failed, falling back to catalog:', error)
-    return listCatalogTemplates()
+    console.error('listMarketplaceTemplates failed:', error)
+    return []
   }
 }
 
@@ -146,27 +188,46 @@ export async function getMarketplaceTemplateBySlugOrId(slugOrId: string): Promis
 
   // Fallback: direct lookup in case list query misses recent rows due cache/RLS edge-cases.
   try {
-    const supabase = createClient()
-    const byId = await supabase
-      .from('templates')
-      .select('id, slug, name, description, price, category, demo_url, preview_data, developer_id, created_at, published')
-      .eq('id', slugOrId)
-      .maybeSingle()
+    const lookupWithClient = async (supabase: any) => {
+      const byId = await supabase
+        .from('templates')
+        .select('id, slug, name, description, price, category, demo_url, preview_data, developer_id, created_at, published')
+        .eq('id', slugOrId)
+        .maybeSingle()
 
-    if (byId.data && isTemplatePublic(byId.data)) {
-      const profileMap = await fetchProfilesById([String(byId.data.developer_id || '')].filter(Boolean))
-      return normalizeTemplate(byId.data, profileMap.get(String(byId.data.developer_id)))
+      if (byId.data && isTemplatePublic(byId.data)) {
+        const profileMap = await fetchProfilesById([String(byId.data.developer_id || '')].filter(Boolean))
+        return normalizeTemplate(byId.data, profileMap.get(String(byId.data.developer_id)))
+      }
+
+      const bySlug = await supabase
+        .from('templates')
+        .select('id, slug, name, description, price, category, demo_url, preview_data, developer_id, created_at, published')
+        .eq('slug', slugOrId)
+        .maybeSingle()
+
+      if (bySlug.data && isTemplatePublic(bySlug.data)) {
+        const profileMap = await fetchProfilesById([String(bySlug.data.developer_id || '')].filter(Boolean))
+        return normalizeTemplate(bySlug.data, profileMap.get(String(bySlug.data.developer_id)))
+      }
+
+      return null
     }
 
-    const bySlug = await supabase
-      .from('templates')
-      .select('id, slug, name, description, price, category, demo_url, preview_data, developer_id, created_at, published')
-      .eq('slug', slugOrId)
-      .maybeSingle()
+    try {
+      const supabase = createClient()
+      const found = await lookupWithClient(supabase)
+      if (found) return found
+    } catch (_error) {
+      // Fall through to admin fallback.
+    }
 
-    if (bySlug.data && isTemplatePublic(bySlug.data)) {
-      const profileMap = await fetchProfilesById([String(bySlug.data.developer_id || '')].filter(Boolean))
-      return normalizeTemplate(bySlug.data, profileMap.get(String(bySlug.data.developer_id)))
+    try {
+      const adminSupabase = createAdminClient()
+      const found = await lookupWithClient(adminSupabase)
+      if (found) return found
+    } catch (_error) {
+      // Fall through to catalog/null fallback.
     }
   } catch (error) {
     console.error('getMarketplaceTemplateBySlugOrId direct lookup failed:', error)

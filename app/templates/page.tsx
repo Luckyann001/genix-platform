@@ -6,6 +6,8 @@ import { AiDiscoveryPanel } from '@/components/templates/AiDiscoveryPanel'
 import { SmartRecommendations } from '@/components/templates/SmartRecommendations'
 import { listMarketplaceTemplates } from '@/lib/templates'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Templates | Genix',
   description: 'Browse published templates built by professional developers.',

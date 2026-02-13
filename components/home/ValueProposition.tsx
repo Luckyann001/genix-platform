@@ -1,34 +1,34 @@
 export function ValueProposition() {
   const pillars = [
     {
-      title: 'Production-ready templates',
-      description: 'Ship-ready code built by experienced developers, not generated boilerplate.',
+      title: 'AI-SaaS-ready architecture',
+      description: 'Each kit is structured for real products with auth, billing, and deployment docs.',
     },
     {
-      title: 'Transparent capabilities',
-      description: 'Every listing includes clear customization boundaries before purchase.',
+      title: 'Safe buyer customization',
+      description: 'Buyers can edit text, fonts, and images through clear boundaries without breaking core logic.',
     },
     {
-      title: 'Faster launch cycle',
-      description: 'Go from selection to deployment quickly with trusted template foundations.',
+      title: 'Launch-speed economics',
+      description: 'Reduce build time from months to days and spend budget on growth instead of basic plumbing.',
     },
   ]
 
   return (
-    <section className="section-sm bg-white">
+    <section className="section-sm bg-slate-950 text-white">
       <div className="container-custom">
         <div className="max-w-3xl mb-12">
-          <h2 className="text-4xl font-bold mb-4">Why founders choose Genix</h2>
-          <p className="text-lg text-gray-600">
-            Reliable website foundations that reduce launch risk and time to market.
+          <h2 className="text-4xl font-bold mb-4">Built for Founder Velocity</h2>
+          <p className="text-lg text-slate-300">
+            Genix is positioned as launch infrastructure, not a generic theme directory.
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
           {pillars.map((pillar) => (
-            <div key={pillar.title} className="card">
+            <div key={pillar.title} className="rounded-xl border border-slate-800 bg-slate-900 p-6">
               <h3 className="text-xl font-semibold mb-2">{pillar.title}</h3>
-              <p className="text-gray-600">{pillar.description}</p>
+              <p className="text-slate-300">{pillar.description}</p>
             </div>
           ))}
         </div>

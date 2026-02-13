@@ -1,132 +1,119 @@
 import Link from 'next/link'
-import { ArrowRight, Play } from 'lucide-react'
+import { ArrowRight, Sparkles, Bot, CreditCard, ShieldCheck } from 'lucide-react'
 
 export function Hero() {
   return (
-    <section className="section bg-gradient-to-b from-gray-50 to-white">
+    <section className="section relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
+      <div className="absolute -top-24 -left-20 w-80 h-80 bg-cyan-500/20 blur-3xl rounded-full" />
+      <div className="absolute -bottom-28 right-0 w-96 h-96 bg-emerald-500/20 blur-3xl rounded-full" />
       <div className="container-custom">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-700 rounded-full text-sm font-medium mb-8 animate-fade-in">
-            <span className="w-2 h-2 bg-primary-600 rounded-full animate-pulse"></span>
-            Built by real professional developers.
+        <div className="max-w-5xl mx-auto text-center relative">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 text-cyan-100 rounded-full text-sm font-medium mb-8 animate-fade-in border border-white/20">
+            <Sparkles size={14} />
+            AI SaaS launch infrastructure for fast-moving founders
           </div>
 
-          {/* Headline */}
           <h1 className="text-5xl lg:text-7xl font-display font-bold mb-6 animate-slide-up">
-            Buy production-ready websites{' '}
-            <span className="gradient-text">built by real developers</span>
+            Launch production-ready{' '}
+            <span className="text-cyan-300">AI SaaS</span>{' '}
+            in days, not months.
           </h1>
 
-          {/* Subheadline */}
-          <p className="text-xl lg:text-2xl text-gray-600 mb-10 max-w-3xl mx-auto animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            Preview, customize, and launch your next project in minutes. No more months of development –
+          <p className="text-xl lg:text-2xl text-slate-200 mb-10 max-w-3xl mx-auto animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            Verified full-stack Next.js kits with auth, billing, usage limits, and clear customization boundaries.
           </p>
 
-          {/* CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            <Link href="/marketplace" className="btn btn-primary text-lg px-8 py-4 w-full sm:w-auto">
-              Browse Templates
+            <Link href="/templates" className="btn bg-cyan-400 text-slate-950 hover:bg-cyan-300 text-lg px-8 py-4 w-full sm:w-auto">
+              Browse AI Launch Kits
               <ArrowRight size={20} />
             </Link>
-            <button className="btn btn-secondary text-lg px-8 py-4 w-full sm:w-auto">
-              <Play size={20} />
-              Watch Demo
-            </button>
+            <Link href="/for-developers" className="btn bg-white/10 border border-white/25 text-white hover:bg-white/20 text-lg px-8 py-4 w-full sm:w-auto">
+              For Developers
+            </Link>
           </div>
 
-          {/* Social Proof */}
-          <div className="flex items-center justify-center gap-8 text-sm text-gray-600 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          <div className="flex items-center justify-center gap-8 text-sm text-slate-300 animate-fade-in" style={{ animationDelay: '0.3s' }}>
             <div className="flex items-center gap-2">
               <div className="flex -space-x-2">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="w-8 h-8 rounded-full bg-gray-300 border-2 border-white" />
+                  <div key={i} className="w-8 h-8 rounded-full bg-slate-700 border-2 border-slate-900" />
                 ))}
               </div>
-              <span>50+ developers</span>
+              <span>Verified builder network</span>
             </div>
-            <div className="w-px h-4 bg-gray-300" />
-            <span>⚡ Deploy in minutes</span>
-            <div className="w-px h-4 bg-gray-300" />
-            <span>✓ 30-day guarantee</span>
+            <div className="w-px h-4 bg-slate-600" />
+            <span>Founder-first roadmap</span>
+            <div className="w-px h-4 bg-slate-600" />
+            <span>Live customizable previews</span>
           </div>
         </div>
 
-        {/* Hero Visual */}
         <div className="mt-20 animate-scale-in" style={{ animationDelay: '0.4s' }}>
           <div className="relative">
-            {/* Browser mockup */}
-            <div className="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
-              {/* Browser chrome */}
-              <div className="bg-gray-100 px-4 py-3 border-b border-gray-200 flex items-center gap-2">
+            <div className="bg-slate-900/70 rounded-xl shadow-2xl border border-slate-700 overflow-hidden">
+              <div className="bg-slate-900 px-4 py-3 border-b border-slate-700 flex items-center gap-2">
                 <div className="flex gap-2">
                   <div className="w-3 h-3 rounded-full bg-red-500" />
                   <div className="w-3 h-3 rounded-full bg-yellow-500" />
                   <div className="w-3 h-3 rounded-full bg-green-500" />
                 </div>
-                <div className="flex-1 mx-4 px-4 py-1.5 bg-white rounded-md text-sm text-gray-600">
-                  genix.so/marketplace
+                <div className="flex-1 mx-4 px-4 py-1.5 bg-slate-800 rounded-md text-sm text-slate-300">
+                  genix.so/templates?category=ai-saas
                 </div>
               </div>
-              {/* Content area - Marketplace preview grid */}
-              <div className="aspect-[16/10] bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+              <div className="aspect-[16/10] bg-gradient-to-br from-slate-900 to-slate-800 p-8">
                 <div className="grid grid-cols-3 gap-4 h-full">
-                  {/* Template card 1 */}
-                  <div className="bg-white rounded-lg shadow-sm p-4 flex flex-col">
-                    <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 rounded mb-3 flex items-center justify-center">
-                      <span className="text-3xl">🚀</span>
+                  <div className="bg-slate-900 rounded-lg border border-cyan-500/30 p-4 flex flex-col">
+                    <div className="aspect-video bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded mb-3 flex items-center justify-center">
+                      <Bot className="text-cyan-300" />
                     </div>
-                    <div className="text-xs font-semibold mb-1">SaaS Starter</div>
-                    <div className="text-xs text-gray-500 mb-2">Complete SaaS template</div>
+                    <div className="text-xs font-semibold mb-1 text-white">AI Copilot SaaS Kit</div>
+                    <div className="text-xs text-slate-400 mb-2">Usage limits + team auth</div>
                     <div className="mt-auto flex items-center justify-between">
-                      <span className="text-sm font-bold">$299</span>
-                      <span className="text-xs text-green-600">⭐ 4.8</span>
+                      <span className="text-sm font-bold text-cyan-300">$399</span>
+                      <span className="text-xs text-emerald-300">verified</span>
                     </div>
                   </div>
-                  
-                  {/* Template card 2 */}
-                  <div className="bg-white rounded-lg shadow-sm p-4 flex flex-col">
-                    <div className="aspect-video bg-gradient-to-br from-green-100 to-teal-100 rounded mb-3 flex items-center justify-center">
-                      <span className="text-3xl">🛒</span>
+
+                  <div className="bg-slate-900 rounded-lg border border-emerald-500/30 p-4 flex flex-col">
+                    <div className="aspect-video bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 rounded mb-3 flex items-center justify-center">
+                      <CreditCard className="text-emerald-300" />
                     </div>
-                    <div className="text-xs font-semibold mb-1">E-commerce Pro</div>
-                    <div className="text-xs text-gray-500 mb-2">Full store template</div>
+                    <div className="text-xs font-semibold mb-1 text-white">AI Billing Core</div>
+                    <div className="text-xs text-slate-400 mb-2">Stripe subscriptions + webhooks</div>
                     <div className="mt-auto flex items-center justify-between">
-                      <span className="text-sm font-bold">$399</span>
-                      <span className="text-xs text-green-600">⭐ 4.9</span>
+                      <span className="text-sm font-bold text-emerald-300">$449</span>
+                      <span className="text-xs text-emerald-300">production</span>
                     </div>
                   </div>
-                  
-                  {/* Template card 3 */}
-                  <div className="bg-white rounded-lg shadow-sm p-4 flex flex-col">
-                    <div className="aspect-video bg-gradient-to-br from-pink-100 to-orange-100 rounded mb-3 flex items-center justify-center">
-                      <span className="text-3xl">💼</span>
+
+                  <div className="bg-slate-900 rounded-lg border border-blue-500/30 p-4 flex flex-col">
+                    <div className="aspect-video bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded mb-3 flex items-center justify-center">
+                      <ShieldCheck className="text-blue-300" />
                     </div>
-                    <div className="text-xs font-semibold mb-1">Portfolio Site</div>
-                    <div className="text-xs text-gray-500 mb-2">Modern portfolio</div>
+                    <div className="text-xs font-semibold mb-1 text-white">AI Guardrails Kit</div>
+                    <div className="text-xs text-slate-400 mb-2">Rate limiting + roles + audit</div>
                     <div className="mt-auto flex items-center justify-between">
-                      <span className="text-sm font-bold">$149</span>
-                      <span className="text-xs text-green-600">⭐ 5.0</span>
+                      <span className="text-sm font-bold text-blue-300">$349</span>
+                      <span className="text-xs text-emerald-300">trusted</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Floating badges */}
-            <div className="absolute -top-6 -left-6 bg-white rounded-lg shadow-lg px-4 py-2 flex items-center gap-2 animate-fade-in" style={{ animationDelay: '0.6s' }}>
-              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold">
-                ✓
-              </div>
+            <div className="absolute -top-6 -left-6 bg-slate-900 rounded-lg shadow-lg px-4 py-2 flex items-center gap-2 animate-fade-in border border-slate-700" style={{ animationDelay: '0.6s' }}>
+              <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-300 font-bold">✓</div>
               <div className="text-sm">
-                <div className="font-semibold">Verified</div>
-                <div className="text-gray-600">Production-ready</div>
+                <div className="font-semibold text-white">Verified Launch Kit</div>
+                <div className="text-slate-400">Auth, billing, docs included</div>
               </div>
             </div>
 
-            <div className="absolute -bottom-6 -right-6 bg-white rounded-lg shadow-lg px-4 py-2 animate-fade-in" style={{ animationDelay: '0.7s' }}>
-              <div className="text-sm font-semibold text-gray-900 mb-1">Deploy Time</div>
-              <div className="text-2xl font-bold text-primary-600">~10 min</div>
+            <div className="absolute -bottom-6 -right-6 bg-slate-900 rounded-lg shadow-lg px-4 py-2 animate-fade-in border border-slate-700" style={{ animationDelay: '0.7s' }}>
+              <div className="text-sm font-semibold text-slate-100 mb-1">Time to first deploy</div>
+              <div className="text-2xl font-bold text-cyan-300">&lt; 1 day</div>
             </div>
           </div>
         </div>
