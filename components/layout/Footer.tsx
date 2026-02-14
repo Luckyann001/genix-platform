@@ -123,6 +123,9 @@ export function Footer() {
               <Link href="/blog" className="text-slate-300 hover:text-primary-300 transition-colors">
                 Blog
               </Link>
+              <Link href="/login?next=%2Fadmin" className="text-slate-300 hover:text-primary-300 transition-colors">
+                Admin Login
+              </Link>
             </div>
           </div>
         </div>

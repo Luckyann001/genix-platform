@@ -227,7 +227,7 @@ Relevant code:
 Admin access is email-based.
 
 1. Set `ADMIN_EMAILS` with comma-separated addresses.
-2. Sign in using one of those addresses.
+2. Sign in using one of those addresses from `/login` (or footer shortcut: `Admin Login`).
 3. Admin routes become available and protected by:
 - `lib/admin-auth.ts`
 - `lib/require-admin.ts`
@@ -237,6 +237,9 @@ Admin pages:
 - `/admin/templates`
 - `/admin/payouts`
 - `/admin/refunds`
+
+Admin login shortcut in UI:
+- Footer link: `/login?next=%2Fadmin`
 
 ## AI Setup (Optional)
 Set `OPENAI_API_KEY` to activate AI features.
@@ -382,6 +385,11 @@ Admin page not visible:
 
 Developer dashboard link visibility:
 - Header currently shows it only for profiles with `user_type = developer` (and admins).
+
+Vercel runtime crash: "Cookies can only be modified in a Server Action or Route Handler":
+- Cause: Supabase auth refresh attempted cookie writes from Server Component execution paths.
+- Fix in this repo: guarded cookie mutation in `lib/supabase/server.ts` so non-mutable contexts do not throw.
+- Recommendation: keep cookie mutations in Route Handlers/Server Actions and validate auth flows after deployment.
 
 ## Scripts
 - `npm run dev` - run local dev server
