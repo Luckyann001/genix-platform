@@ -41,6 +41,36 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     if (connectionError) throw connectionError
 
+    const { data: project, error: projectError } = await adminSupabase
+      .from('buyer_launch_projects')
+      .select('id, onboarding_data')
+      .eq('purchase_id', purchaseId)
+      .eq('buyer_id', user.id)
+      .maybeSingle()
+
+    if (projectError) throw projectError
+    if (!project) return errorResponse('Launch project not found. Save onboarding first.', 400)
+
+    const onboardingData = project.onboarding_data && typeof project.onboarding_data === 'object' ? project.onboarding_data : {}
+    const domainMode = String(onboardingData.domain_mode || 'genix_subdomain').toLowerCase()
+    const genixSubdomain = String(onboardingData.genix_subdomain || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 48)
+    const customDomain = String(onboardingData.custom_domain || '').trim().toLowerCase()
+    const customDnsVerified = Boolean(onboardingData.custom_domain_dns_verified)
+    const customDomainVerified = Boolean(onboardingData.custom_domain_verified)
+
+    if (domainMode === 'custom_domain') {
+      if (!customDomain) return errorResponse('Add your custom domain before launching', 400)
+      if (!customDnsVerified) return errorResponse('Complete DNS record setup before launching', 400)
+      if (!customDomainVerified) return errorResponse('Custom domain is not verified yet', 400)
+    } else if (!genixSubdomain) {
+      return errorResponse('Choose a free Genix subdomain before launching', 400)
+    }
+
     const sourceRepoUrl = String((purchase as any)?.template?.github_url || '').trim()
     const quickDeployUrl = sourceRepoUrl
       ? `https://vercel.com/new/clone?repository-url=${encodeURIComponent(sourceRepoUrl)}`
@@ -71,7 +101,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .eq('buyer_id', user.id)
 
     const appName = `${slugify(String((purchase as any)?.template?.name || 'genix-launch'))}-${purchaseId.slice(0, 6)}`
-    const liveUrl = `https://${appName}.vercel.app`
+    const finalDomain = domainMode === 'custom_domain' ? customDomain : `${genixSubdomain}.genix.site`
+    const liveUrl = `https://${finalDomain}`
     const adminUrl = `${liveUrl}/admin`
 
     // MVP behavior: mark as live and provide deterministic URLs after connect.
@@ -83,6 +114,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       source_repo: sourceRepoUrl || null,
       deployed_at: new Date().toISOString(),
       quick_deploy_url: quickDeployUrl,
+      domain_mode: domainMode,
+      configured_domain: finalDomain,
     }
 
     await adminSupabase

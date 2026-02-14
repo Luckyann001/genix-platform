@@ -39,6 +39,19 @@ export async function POST(request: NextRequest) {
     const rawExclusivePrice = Number(payload?.exclusivePrice || 0)
     const supportPackageAvailable = Boolean(payload?.supportPackageAvailable)
     const rawSupportPackagePrice = Number(payload?.supportPackagePrice || 0)
+    const supportEmail = String(payload?.supportEmail || '').trim()
+    const supportChannel = String(payload?.supportChannel || '').trim()
+    const supportTimezone = String(payload?.supportTimezone || '').trim()
+    const supportResponseSlaHours = Number(payload?.supportResponseSlaHours || 0)
+    const supportDurationDays = Number(payload?.supportDurationDays || 0)
+    const supportIncluded = String(payload?.supportIncluded || '').trim()
+    const supportExcluded = String(payload?.supportExcluded || '').trim()
+    const guideBackendSetup = String(payload?.guideBackendSetup || '').trim()
+    const guideAuthSetup = String(payload?.guideAuthSetup || '').trim()
+    const guidePaymentsSetup = String(payload?.guidePaymentsSetup || '').trim()
+    const guideAiBillingSetup = String(payload?.guideAiBillingSetup || '').trim()
+    const guidePrivacySecurity = String(payload?.guidePrivacySecurity || '').trim()
+    const guideDeploymentRunbook = String(payload?.guideDeploymentRunbook || '').trim()
     const features = Array.isArray(payload?.features)
       ? payload.features.map((feature: unknown) => String(feature).trim()).filter(Boolean)
       : []
@@ -46,6 +59,29 @@ export async function POST(request: NextRequest) {
 
     if (!name || !longDescription || !category || !githubUrl || Number.isNaN(rawPrice) || rawPrice <= 0) {
       return errorResponse('Missing required fields')
+    }
+    if (
+      !supportEmail ||
+      !supportChannel ||
+      !supportTimezone ||
+      Number.isNaN(supportResponseSlaHours) ||
+      supportResponseSlaHours <= 0 ||
+      Number.isNaN(supportDurationDays) ||
+      supportDurationDays <= 0 ||
+      !supportIncluded ||
+      !supportExcluded
+    ) {
+      return errorResponse('Support package details are required')
+    }
+    if (
+      !guideBackendSetup ||
+      !guideAuthSetup ||
+      !guidePaymentsSetup ||
+      !guideAiBillingSetup ||
+      !guidePrivacySecurity ||
+      !guideDeploymentRunbook
+    ) {
+      return errorResponse('Setup guide is required for all templates')
     }
 
     const { data: authData } = await supabase.auth.getUser()
@@ -73,6 +109,23 @@ export async function POST(request: NextRequest) {
       consultation: {
         enabled: Boolean(payload?.consultationAvailable),
         hourly_rate: payload?.consultationRate ? Number(payload.consultationRate) : null,
+      },
+      support: {
+        email: supportEmail,
+        channel: supportChannel,
+        timezone: supportTimezone,
+        response_sla_hours: Math.round(supportResponseSlaHours),
+        duration_days: Math.round(supportDurationDays),
+        included: supportIncluded,
+        excluded: supportExcluded,
+      },
+      setup_guide: {
+        backend_setup: guideBackendSetup,
+        auth_setup: guideAuthSetup,
+        payments_setup: guidePaymentsSetup,
+        ai_billing_setup: guideAiBillingSetup,
+        privacy_security: guidePrivacySecurity,
+        deployment_runbook: guideDeploymentRunbook,
       },
       capability_map: {
         editable: ['Text', 'Theme', 'Images', 'Sections'],

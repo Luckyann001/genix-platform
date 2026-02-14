@@ -22,6 +22,14 @@ type LaunchResponse = {
     name: string
     github_url?: string | null
     demo_url?: string | null
+    setup_guide?: {
+      backend_setup?: string
+      auth_setup?: string
+      payments_setup?: string
+      ai_billing_setup?: string
+      privacy_security?: string
+      deployment_runbook?: string
+    }
   } | null
   project: {
     status: string
@@ -41,6 +49,12 @@ type LaunchResponse = {
 const EMPTY_ONBOARDING = {
   brand_name: '',
   domain: '',
+  domain_mode: 'genix_subdomain',
+  genix_subdomain: '',
+  custom_domain: '',
+  custom_domain_provider: '',
+  custom_domain_dns_verified: false,
+  custom_domain_verified: false,
   business_email: '',
   payment_account: '',
   legal_pages_ready: false,
@@ -101,11 +115,28 @@ export function LaunchClient({ purchaseId }: LaunchClientProps) {
     setMessage('')
     setError('')
     try {
+      const domainMode = String(onboarding.domain_mode || 'genix_subdomain') === 'custom_domain' ? 'custom_domain' : 'genix_subdomain'
+      const normalizedGenixSubdomain = String(onboarding.genix_subdomain || '')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9-]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 48)
+      const normalizedCustomDomain = String(onboarding.custom_domain || '').trim().toLowerCase()
+      const resolvedDomain =
+        domainMode === 'custom_domain' ? normalizedCustomDomain : normalizedGenixSubdomain ? `${normalizedGenixSubdomain}.genix.site` : ''
+
       const response = await fetch(`/api/launch/projects/${purchaseId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          onboardingData: onboarding,
+          onboardingData: {
+            ...onboarding,
+            domain_mode: domainMode,
+            genix_subdomain: normalizedGenixSubdomain,
+            custom_domain: normalizedCustomDomain,
+            domain: resolvedDomain,
+          },
           status: 'ready',
         }),
       })
@@ -204,6 +235,33 @@ export function LaunchClient({ purchaseId }: LaunchClientProps) {
 
   const liveUrl = data?.project?.live_url || data?.purchase?.launch_live_url || ''
   const adminUrl = data?.project?.admin_panel_url || data?.purchase?.launch_admin_url || ''
+  const domainMode = String(onboarding.domain_mode || 'genix_subdomain') === 'custom_domain' ? 'custom_domain' : 'genix_subdomain'
+  const normalizedGenixSubdomain = String(onboarding.genix_subdomain || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48)
+  const normalizedCustomDomain = String(onboarding.custom_domain || '').trim().toLowerCase()
+  const customDnsVerified = Boolean(onboarding.custom_domain_dns_verified)
+  const customDomainVerified = Boolean(onboarding.custom_domain_verified)
+  const selectedDomain =
+    domainMode === 'custom_domain'
+      ? normalizedCustomDomain
+      : normalizedGenixSubdomain
+      ? `${normalizedGenixSubdomain}.genix.site`
+      : ''
+
+  let deployBlockedReason = ''
+  if (!data?.hostingConnection) {
+    deployBlockedReason = 'Connect Vercel to continue.'
+  } else if (domainMode === 'custom_domain') {
+    if (!normalizedCustomDomain) deployBlockedReason = 'Add your custom domain.'
+    else if (!customDnsVerified) deployBlockedReason = 'Complete DNS setup and confirm records.'
+    else if (!customDomainVerified) deployBlockedReason = 'Verify your custom domain before launching.'
+  } else if (!normalizedGenixSubdomain) {
+    deployBlockedReason = 'Choose your free Genix subdomain.'
+  }
 
   return (
     <div className="min-h-screen">
@@ -250,13 +308,149 @@ export function LaunchClient({ purchaseId }: LaunchClientProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Domain</label>
-              <input
-                className="input"
-                placeholder="app.yourdomain.com"
-                value={String(onboarding.domain || '')}
-                onChange={(e) => setOnboarding((prev) => ({ ...prev, domain: e.target.value }))}
-              />
+              <label className="block text-sm font-medium mb-2">Launch Domain</label>
+              <div className="space-y-3">
+                <label className="flex items-start gap-2 rounded-lg border border-gray-200 p-3">
+                  <input
+                    type="radio"
+                    name="domainMode"
+                    className="mt-1"
+                    checked={domainMode === 'genix_subdomain'}
+                    onChange={() =>
+                      setOnboarding((prev) => ({
+                        ...prev,
+                        domain_mode: 'genix_subdomain',
+                        custom_domain_verified: false,
+                      }))
+                    }
+                  />
+                  <span className="text-sm text-gray-700">
+                    <span className="font-medium text-gray-900 block">Use free Genix subdomain</span>
+                    Launch fast with `yourname.genix.site`.
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-2 rounded-lg border border-gray-200 p-3">
+                  <input
+                    type="radio"
+                    name="domainMode"
+                    className="mt-1"
+                    checked={domainMode === 'custom_domain'}
+                    onChange={() =>
+                      setOnboarding((prev) => ({
+                        ...prev,
+                        domain_mode: 'custom_domain',
+                      }))
+                    }
+                  />
+                  <span className="text-sm text-gray-700">
+                    <span className="font-medium text-gray-900 block">Connect custom domain</span>
+                    Use your own domain from any registrar.
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            {domainMode === 'genix_subdomain' ? (
+              <div>
+                <label className="block text-sm font-medium mb-1">Choose subdomain</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    className="input"
+                    placeholder="mybrand"
+                    value={String(onboarding.genix_subdomain || '')}
+                    onChange={(e) =>
+                      setOnboarding((prev) => ({
+                        ...prev,
+                        genix_subdomain: e.target.value,
+                      }))
+                    }
+                  />
+                  <span className="text-sm text-gray-600 whitespace-nowrap">.genix.site</span>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3 rounded-lg border border-gray-200 p-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Custom domain</label>
+                  <input
+                    className="input"
+                    placeholder="app.yourdomain.com"
+                    value={String(onboarding.custom_domain || '')}
+                    onChange={(e) =>
+                      setOnboarding((prev) => ({
+                        ...prev,
+                        custom_domain: e.target.value,
+                        custom_domain_verified: false,
+                      }))
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">DNS provider (optional)</label>
+                  <input
+                    className="input"
+                    placeholder="Cloudflare, Namecheap, GoDaddy..."
+                    value={String(onboarding.custom_domain_provider || '')}
+                    onChange={(e) =>
+                      setOnboarding((prev) => ({
+                        ...prev,
+                        custom_domain_provider: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                <div className="text-xs text-gray-600 space-y-1">
+                  <p>DNS steps (provider-agnostic):</p>
+                  <p>1. Add `CNAME` record: host `www` → target `cname.vercel-dns.com`.</p>
+                  <p>2. Add `A` record: host `@` → target `76.76.21.21`.</p>
+                  <p>3. Wait for DNS propagation, then verify below.</p>
+                </div>
+
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    className="rounded"
+                    checked={Boolean(onboarding.custom_domain_dns_verified)}
+                    onChange={(e) =>
+                      setOnboarding((prev) => ({
+                        ...prev,
+                        custom_domain_dns_verified: e.target.checked,
+                        custom_domain_verified: e.target.checked ? Boolean(prev.custom_domain_verified) : false,
+                      }))
+                    }
+                  />
+                  DNS records configured
+                </label>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() =>
+                      setOnboarding((prev) => ({
+                        ...prev,
+                        custom_domain_verified: Boolean(prev.custom_domain_dns_verified && String(prev.custom_domain || '').trim()),
+                      }))
+                    }
+                  >
+                    Verify Domain
+                  </button>
+                  <span
+                    className={`text-xs font-medium ${
+                      customDomainVerified ? 'text-green-700' : 'text-amber-700'
+                    }`}
+                  >
+                    {customDomainVerified ? 'Verification status: Verified' : 'Verification status: Pending'}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className="text-xs text-gray-600">
+              Selected domain: <span className="font-medium text-gray-800">{selectedDomain || 'Not configured'}</span>
             </div>
 
             <div>
@@ -314,10 +508,11 @@ export function LaunchClient({ purchaseId }: LaunchClientProps) {
               </div>
             )}
 
-            <button className="btn btn-primary" onClick={deployNow} disabled={deploying}>
+            <button className="btn btn-primary" onClick={deployNow} disabled={deploying || Boolean(deployBlockedReason)}>
               {deploying ? <Loader2 size={16} className="animate-spin" /> : <Rocket size={16} />}
               One-Click Deploy
             </button>
+            {deployBlockedReason && <p className="text-sm text-amber-700">{deployBlockedReason}</p>}
 
             {liveUrl && (
               <div className="rounded-lg border border-green-300 bg-green-50 p-4 space-y-2">
@@ -376,6 +571,40 @@ export function LaunchClient({ purchaseId }: LaunchClientProps) {
             <Link href={`/customize/${data?.purchase?.template_id}?purchase=${purchaseId}`} className="text-sm text-primary-700 underline">
               Open advanced customizer
             </Link>
+          </div>
+        </div>
+
+        <div className="card space-y-3">
+          <h2 className="text-xl font-semibold">Developer Setup Guide</h2>
+          <p className="text-sm text-slate-600">
+            Complete this checklist to configure backend, payments, AI billing, and secure production launch.
+          </p>
+
+          <div className="space-y-3 text-sm text-slate-700">
+            <div>
+              <p className="font-medium text-slate-900">Backend setup</p>
+              <p>{String(data?.template?.setup_guide?.backend_setup || 'Not provided.')}</p>
+            </div>
+            <div>
+              <p className="font-medium text-slate-900">Authentication setup</p>
+              <p>{String(data?.template?.setup_guide?.auth_setup || 'Not provided.')}</p>
+            </div>
+            <div>
+              <p className="font-medium text-slate-900">Payments by region</p>
+              <p>{String(data?.template?.setup_guide?.payments_setup || 'Not provided.')}</p>
+            </div>
+            <div>
+              <p className="font-medium text-slate-900">AI billing and tokens</p>
+              <p>{String(data?.template?.setup_guide?.ai_billing_setup || 'Not provided.')}</p>
+            </div>
+            <div>
+              <p className="font-medium text-slate-900">Privacy and security</p>
+              <p>{String(data?.template?.setup_guide?.privacy_security || 'Not provided.')}</p>
+            </div>
+            <div>
+              <p className="font-medium text-slate-900">Deployment runbook</p>
+              <p>{String(data?.template?.setup_guide?.deployment_runbook || 'Not provided.')}</p>
+            </div>
           </div>
         </div>
       </div>

@@ -109,6 +109,19 @@ export function SubmitTemplateForm() {
       exclusivePrice: Number(formData.get('exclusivePrice') || 0),
       supportPackageAvailable: formData.get('supportPackageAvailable') === 'on',
       supportPackagePrice: Number(formData.get('supportPackagePrice') || 0),
+      supportEmail: String(formData.get('supportEmail') || '').trim(),
+      supportChannel: String(formData.get('supportChannel') || '').trim(),
+      supportTimezone: String(formData.get('supportTimezone') || '').trim(),
+      supportResponseSlaHours: Number(formData.get('supportResponseSlaHours') || 0),
+      supportDurationDays: Number(formData.get('supportDurationDays') || 0),
+      supportIncluded: String(formData.get('supportIncluded') || '').trim(),
+      supportExcluded: String(formData.get('supportExcluded') || '').trim(),
+      guideBackendSetup: String(formData.get('guideBackendSetup') || '').trim(),
+      guideAuthSetup: String(formData.get('guideAuthSetup') || '').trim(),
+      guidePaymentsSetup: String(formData.get('guidePaymentsSetup') || '').trim(),
+      guideAiBillingSetup: String(formData.get('guideAiBillingSetup') || '').trim(),
+      guidePrivacySecurity: String(formData.get('guidePrivacySecurity') || '').trim(),
+      guideDeploymentRunbook: String(formData.get('guideDeploymentRunbook') || '').trim(),
     }
 
     try {
@@ -388,6 +401,145 @@ export function SubmitTemplateForm() {
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">/hour</span>
             </div>
             <p className="text-sm text-gray-500 mt-1">You&apos;ll receive 85% of consulting fees</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Support Contact */}
+      <div className="pt-6 border-t">
+        <h2 className="text-xl font-semibold mb-4">Support Package Details (Required)</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Buyers rely on this for launch setup, regional payments, AI billing setup, and security guidance.
+        </p>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Support Email *</label>
+              <input
+                type="email"
+                name="supportEmail"
+                className="input"
+                placeholder="support@yourdomain.com"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Support Channel *</label>
+              <input
+                type="text"
+                name="supportChannel"
+                className="input"
+                placeholder="Email, Discord, WhatsApp, Telegram"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Timezone *</label>
+              <input type="text" name="supportTimezone" className="input" placeholder="UTC+1" required />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Response SLA (hours) *</label>
+              <input type="number" name="supportResponseSlaHours" className="input" placeholder="24" min="1" required />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Support Duration (days) *</label>
+              <input type="number" name="supportDurationDays" className="input" placeholder="30" min="1" required />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">What&apos;s Included *</label>
+            <textarea
+              name="supportIncluded"
+              className="input min-h-[120px]"
+              placeholder="Example: deployment guidance, payment setup (Paystack/Stripe/Apple Pay), AI token billing setup, privacy/security checklist."
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">What&apos;s Excluded *</label>
+            <textarea
+              name="supportExcluded"
+              className="input min-h-[100px]"
+              placeholder="Example: net-new features, full redesign, long-term product management."
+              required
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Setup Guide */}
+      <div className="pt-6 border-t">
+        <h2 className="text-xl font-semibold mb-4">Developer Setup Guide (Required)</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          This guide is shown to buyers on template detail and launch flow.
+        </p>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Backend Setup *</label>
+            <textarea
+              name="guideBackendSetup"
+              className="input min-h-[110px]"
+              placeholder="How buyer creates DB, env vars, and migrates schema."
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Auth Setup *</label>
+            <textarea
+              name="guideAuthSetup"
+              className="input min-h-[110px]"
+              placeholder="How buyer enables auth providers, callback URLs, and roles."
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Payments Setup (Regional) *</label>
+            <textarea
+              name="guidePaymentsSetup"
+              className="input min-h-[110px]"
+              placeholder="Paystack/Stripe/Apple Pay setup and region-specific notes."
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">AI API Keys, Billing & Tokens *</label>
+            <textarea
+              name="guideAiBillingSetup"
+              className="input min-h-[110px]"
+              placeholder="How buyer creates keys, adds credits, sets limits and budget alerts."
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Privacy & Security Checklist *</label>
+            <textarea
+              name="guidePrivacySecurity"
+              className="input min-h-[110px]"
+              placeholder="Secret management, data retention, legal pages, rate limits, backups."
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Deployment Runbook *</label>
+            <textarea
+              name="guideDeploymentRunbook"
+              className="input min-h-[110px]"
+              placeholder="Step-by-step deployment and post-launch checks."
+              required
+            />
           </div>
         </div>
       </div>

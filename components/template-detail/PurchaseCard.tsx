@@ -70,7 +70,7 @@ export function PurchaseCard({
   return (
     <div className="card mt-4">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-gray-600">One-time access</span>
+        <span className="text-gray-600">{exclusivePurchase ? 'Exclusive ownership license' : 'Standard multi-sale license'}</span>
         <span className="text-2xl font-bold">
           {formatUSD(
             (exclusivePurchase ? Number(exclusivePrice || price) : price) +
@@ -128,6 +128,11 @@ export function PurchaseCard({
       )}
 
       <p className="mt-3 text-xs text-gray-500">
+        Standard license means this template can be sold to multiple buyers. Choose exclusive buyout to permanently
+        remove it from the marketplace after your purchase.
+      </p>
+
+      <p className="mt-2 text-xs text-gray-500">
         30-day guarantee. Need help with a refund later? Visit{' '}
         <Link href="/refunds" className="underline">
           Refund Requests

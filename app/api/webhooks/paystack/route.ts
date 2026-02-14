@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     // Template purchase payment success
     const { data: purchase } = await supabase
       .from('purchases')
-      .select('id, status, purchase_mode')
+      .select('id, status, purchase_mode, buyer_id')
       .eq('id', purchaseId)
       .single()
 
@@ -86,6 +86,34 @@ export async function POST(request: NextRequest) {
 
     if (purchase.status === 'completed') {
       return NextResponse.json({ received: true })
+    }
+
+    const { data: template } = await supabase
+      .from('templates')
+      .select('id, name, developer_id, price, preview_data')
+      .eq('id', templateId)
+      .single()
+
+    if (!template || !template.name || !template.developer_id) {
+      return NextResponse.json({ error: 'Template not found' }, { status: 404 })
+    }
+
+    const previewData = template.preview_data && typeof template.preview_data === 'object' ? template.preview_data : {}
+
+    if (purchase.purchase_mode === 'exclusive') {
+      const soldExclusiveAt = String(previewData.sold_exclusive_at || '').trim()
+      const soldExclusivePurchaseId = String(previewData.sold_exclusive_purchase_id || '').trim()
+      if (soldExclusiveAt && soldExclusivePurchaseId && soldExclusivePurchaseId !== purchase.id) {
+        await supabase
+          .from('purchases')
+          .update({
+            status: 'failed',
+            payment_reference: reference,
+          })
+          .eq('id', purchase.id)
+
+        return NextResponse.json({ error: 'Exclusive ownership already transferred' }, { status: 409 })
+      }
     }
 
     await supabase
@@ -101,18 +129,7 @@ export async function POST(request: NextRequest) {
       template_uuid: templateId
     })
 
-    const { data: template } = await supabase
-      .from('templates')
-      .select('id, name, developer_id, price, preview_data')
-      .eq('id', templateId)
-      .single()
-
-    if (!template || !template.name || !template.developer_id) {
-      return NextResponse.json({ error: 'Template not found' }, { status: 404 })
-    }
-
     if (purchase.purchase_mode === 'exclusive') {
-      const previewData = template.preview_data && typeof template.preview_data === 'object' ? template.preview_data : {}
       await supabase
         .from('templates')
         .update({
@@ -121,6 +138,7 @@ export async function POST(request: NextRequest) {
             listing_status: 'unlisted',
             sold_exclusive_at: new Date().toISOString(),
             sold_exclusive_purchase_id: purchaseId,
+            owner_buyer_id: purchase.buyer_id || buyerId || null,
           },
         })
         .eq('id', templateId)

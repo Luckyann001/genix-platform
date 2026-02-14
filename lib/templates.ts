@@ -29,6 +29,23 @@ export type TemplateRecord = {
   stack?: string[]
   consultation_available?: boolean
   consultation_rate?: number | null
+  support?: {
+    email: string
+    channel: string
+    timezone: string
+    response_sla_hours: number | null
+    duration_days: number | null
+    included: string
+    excluded: string
+  }
+  setup_guide?: {
+    backend_setup: string
+    auth_setup: string
+    payments_setup: string
+    ai_billing_setup: string
+    privacy_security: string
+    deployment_runbook: string
+  }
 }
 
 const DEFAULT_CAPABILITY_MAP: TemplateCapabilityMap = {
@@ -50,6 +67,8 @@ function normalizeTemplate(row: any, developer: any): TemplateRecord {
   const previewData = row?.preview_data && typeof row.preview_data === 'object' ? row.preview_data : {}
   const techStack = previewData.tech_stack && typeof previewData.tech_stack === 'object' ? previewData.tech_stack : {}
   const consultation = previewData.consultation && typeof previewData.consultation === 'object' ? previewData.consultation : {}
+  const support = previewData.support && typeof previewData.support === 'object' ? previewData.support : {}
+  const setupGuide = previewData.setup_guide && typeof previewData.setup_guide === 'object' ? previewData.setup_guide : {}
 
   const capabilityMap =
     previewData.capability_map &&
@@ -95,6 +114,23 @@ function normalizeTemplate(row: any, developer: any): TemplateRecord {
     stack,
     consultation_available: Boolean(consultation.enabled),
     consultation_rate: consultation.hourly_rate ? Number(consultation.hourly_rate) : null,
+    support: {
+      email: String(support.email || ''),
+      channel: String(support.channel || ''),
+      timezone: String(support.timezone || ''),
+      response_sla_hours: support.response_sla_hours ? Number(support.response_sla_hours) : null,
+      duration_days: support.duration_days ? Number(support.duration_days) : null,
+      included: String(support.included || ''),
+      excluded: String(support.excluded || ''),
+    },
+    setup_guide: {
+      backend_setup: String(setupGuide.backend_setup || ''),
+      auth_setup: String(setupGuide.auth_setup || ''),
+      payments_setup: String(setupGuide.payments_setup || ''),
+      ai_billing_setup: String(setupGuide.ai_billing_setup || ''),
+      privacy_security: String(setupGuide.privacy_security || ''),
+      deployment_runbook: String(setupGuide.deployment_runbook || ''),
+    },
   }
 }
 

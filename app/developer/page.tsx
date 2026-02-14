@@ -119,9 +119,14 @@ export default async function DeveloperDashboardPage() {
                             <p className="capitalize">Status: {row.review_status}</p>
                           </div>
                         </div>
-                        <Link href={`/templates/${row.id}`} className="text-sm text-primary-600 hover:underline">
-                          View
-                        </Link>
+                        <div className="flex flex-col items-end gap-2">
+                          <Link href={`/templates/${row.id}`} className="text-sm text-primary-600 hover:underline">
+                            View
+                          </Link>
+                          <Link href={`/developer/templates/${row.id}/edit`} className="text-sm text-primary-600 hover:underline">
+                            Edit
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   ))}

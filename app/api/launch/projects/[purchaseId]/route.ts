@@ -26,7 +26,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const { data: purchase, error: purchaseError } = await adminSupabase
       .from('purchases')
       .select(
-        'id, buyer_id, status, template_id, launch_status, launch_live_url, launch_admin_url, template:templates(id, name, github_url, demo_url)'
+        'id, buyer_id, status, template_id, launch_status, launch_live_url, launch_admin_url, template:templates(id, name, github_url, demo_url, preview_data)'
       )
       .eq('id', purchaseId)
       .maybeSingle()
@@ -56,6 +56,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           onboarding_data: {
             brand_name: normalizeTemplateRow((purchase as any)?.template)?.name || '',
             domain: '',
+            domain_mode: 'genix_subdomain',
+            genix_subdomain: '',
+            custom_domain: '',
+            custom_domain_provider: '',
+            custom_domain_dns_verified: false,
+            custom_domain_verified: false,
             business_email: user.email || '',
             payment_account: '',
             legal_pages_ready: false,
@@ -77,6 +83,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     if (hostingError) throw hostingError
 
+    const templateRow = normalizeTemplateRow((purchase as any).template)
+    const templatePreviewData =
+      templateRow?.preview_data && typeof templateRow.preview_data === 'object' ? templateRow.preview_data : {}
+    const setupGuide =
+      templatePreviewData.setup_guide && typeof templatePreviewData.setup_guide === 'object'
+        ? templatePreviewData.setup_guide
+        : {}
+
     return successResponse({
       purchase: {
         id: purchase.id,
@@ -86,7 +100,22 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         launch_live_url: purchase.launch_live_url,
         launch_admin_url: purchase.launch_admin_url,
       },
-      template: normalizeTemplateRow((purchase as any).template),
+      template: templateRow
+        ? {
+            id: templateRow.id,
+            name: templateRow.name,
+            github_url: templateRow.github_url || null,
+            demo_url: templateRow.demo_url || null,
+            setup_guide: {
+              backend_setup: String(setupGuide.backend_setup || ''),
+              auth_setup: String(setupGuide.auth_setup || ''),
+              payments_setup: String(setupGuide.payments_setup || ''),
+              ai_billing_setup: String(setupGuide.ai_billing_setup || ''),
+              privacy_security: String(setupGuide.privacy_security || ''),
+              deployment_runbook: String(setupGuide.deployment_runbook || ''),
+            },
+          }
+        : null,
       project,
       hostingConnection: hostingConnection || null,
     })

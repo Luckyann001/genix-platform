@@ -25,6 +25,17 @@ export async function POST(request: NextRequest) {
     if (templateError || !template) {
       return errorResponse('Template not found', 404)
     }
+
+    const previewData = template.preview_data && typeof template.preview_data === 'object' ? template.preview_data : {}
+    const reviewStatus = String(previewData.review_status || '').toLowerCase()
+    const listingStatus = String(previewData.listing_status || '').toLowerCase()
+    const soldExclusiveAt = String(previewData.sold_exclusive_at || '').trim()
+    if (reviewStatus && reviewStatus !== 'approved') {
+      return errorResponse('Template is not available for purchase yet', 400)
+    }
+    if (listingStatus === 'unlisted' || soldExclusiveAt) {
+      return errorResponse('Template is no longer available', 400)
+    }
     
     // Check if already purchased
     const { data: existingPurchase } = await supabase
@@ -44,6 +55,20 @@ export async function POST(request: NextRequest) {
 
     if (supportPackage && !template.support_package_available) {
       return errorResponse('Support package is not available for this template', 400)
+    }
+
+    if (exclusivePurchase) {
+      const { data: existingExclusivePurchase } = await supabase
+        .from('purchases')
+        .select('id, status')
+        .eq('template_id', templateId)
+        .eq('purchase_mode', 'exclusive')
+        .eq('status', 'completed')
+        .maybeSingle()
+
+      if (existingExclusivePurchase) {
+        return errorResponse('Exclusive ownership has already been sold for this template', 400)
+      }
     }
 
     const basePrice = exclusivePurchase
