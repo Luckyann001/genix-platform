@@ -13,7 +13,21 @@ export function createClient(): SupabaseClient {
   }
 
   const cookieStore = cookies()
-  return createRouteHandlerClient({ cookies: () => cookieStore })
+  // This client is used in both Route Handlers and Server Components.
+  // Server Components cannot mutate cookies, so we guard set() to avoid runtime crashes
+  // when Supabase attempts a token refresh during auth.getUser().
+  const safeCookieStore = {
+    get: (name: string) => cookieStore.get(name),
+    set: (name: string, value: string, options?: Record<string, any>) => {
+      try {
+        cookieStore.set(name, value, options as any)
+      } catch {
+        // Ignore cookie writes in contexts where Next.js forbids mutation.
+      }
+    },
+  } as any
+
+  return createRouteHandlerClient({ cookies: () => safeCookieStore })
 }
 
 // Privileged client for trusted server-only operations (never expose this to the browser).
