@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { requireDeveloper } from '@/lib/require-developer'
+import { formatUSD } from '@/lib/currency'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,7 +12,7 @@ export default async function DeveloperDashboardPage() {
   const [{ data: templates }, { data: notifications }] = await Promise.all([
     supabase
       .from('templates')
-      .select('id, slug, name, price, created_at, preview_data')
+      .select('*')
       .eq('developer_id', user.id)
       .order('created_at', { ascending: false })
       .limit(20),
@@ -26,6 +27,13 @@ export default async function DeveloperDashboardPage() {
   const templateRows = (templates || []).map((row: any) => ({
     ...row,
     review_status: String(row?.preview_data?.review_status || 'pending').toLowerCase(),
+    summary: String(row?.preview_data?.summary || row?.description || 'No description provided.'),
+    stack: [
+      String(row?.preview_data?.tech_stack?.database || '').trim(),
+      String(row?.preview_data?.tech_stack?.authentication || '').trim(),
+      String(row?.preview_data?.tech_stack?.payment_provider || '').trim(),
+      String(row?.preview_data?.tech_stack?.other_tools || '').trim(),
+    ].filter(Boolean),
   }))
 
   const approvedCount = templateRows.filter((row: any) => row.review_status === 'approved').length
@@ -71,15 +79,47 @@ export default async function DeveloperDashboardPage() {
               {templateRows.length === 0 ? (
                 <p className="text-gray-600">No templates submitted yet.</p>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {templateRows.map((row: any) => (
-                    <div key={row.id} className="rounded-lg border border-gray-200 p-3">
-                      <div className="flex items-center justify-between gap-3">
+                    <div key={row.id} className="rounded-lg border border-gray-200 p-4">
+                      <div className="flex items-start justify-between gap-3">
                         <div>
+                          <p className="text-xs text-primary-700 font-medium mb-1">{String(row.category || 'General')}</p>
                           <p className="font-semibold">{row.name}</p>
-                          <p className="text-sm text-gray-600">${Number(row.price || 0)} · {row.review_status}</p>
+                          <p className="text-sm text-gray-600 mt-1">{row.summary}</p>
+                          {row.stack.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-3">
+                              {row.stack.slice(0, 4).map((item: string) => (
+                                <span key={item} className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-700">
+                                  {item}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          <div className="text-sm text-gray-600 mt-3 space-y-1">
+                            <p>Price: {formatUSD(Number(row.price || 0))}</p>
+                            <p>
+                              Support package:{' '}
+                              {row.support_package_available
+                                ? `Available${
+                                    row.support_package_price ? ` (${formatUSD(Number(row.support_package_price))})` : ''
+                                  }`
+                                : 'Not included'}
+                            </p>
+                            <p>
+                              Consultation:{' '}
+                              {row?.preview_data?.consultation?.enabled
+                                ? `Available${
+                                    row?.preview_data?.consultation?.hourly_rate
+                                      ? ` (${formatUSD(Number(row.preview_data.consultation.hourly_rate))}/hour)`
+                                      : ''
+                                  }`
+                                : 'Not available'}
+                            </p>
+                            <p className="capitalize">Status: {row.review_status}</p>
+                          </div>
                         </div>
-                        <Link href={`/templates/${row.slug || row.id}`} className="text-sm text-primary-600 hover:underline">
+                        <Link href={`/templates/${row.id}`} className="text-sm text-primary-600 hover:underline">
                           View
                         </Link>
                       </div>

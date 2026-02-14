@@ -26,6 +26,9 @@ export type TemplateRecord = {
   exclusive_price?: number | null
   support_package_available?: boolean
   support_package_price?: number | null
+  stack?: string[]
+  consultation_available?: boolean
+  consultation_rate?: number | null
 }
 
 const DEFAULT_CAPABILITY_MAP: TemplateCapabilityMap = {
@@ -45,6 +48,8 @@ function formatCategory(value: unknown): string {
 
 function normalizeTemplate(row: any, developer: any): TemplateRecord {
   const previewData = row?.preview_data && typeof row.preview_data === 'object' ? row.preview_data : {}
+  const techStack = previewData.tech_stack && typeof previewData.tech_stack === 'object' ? previewData.tech_stack : {}
+  const consultation = previewData.consultation && typeof previewData.consultation === 'object' ? previewData.consultation : {}
 
   const capabilityMap =
     previewData.capability_map &&
@@ -61,6 +66,12 @@ function normalizeTemplate(row: any, developer: any): TemplateRecord {
 
   const id = String(row?.id || '')
   const title = String(row?.name || row?.title || 'Untitled template')
+  const stack = [
+    String(techStack.database || '').trim(),
+    String(techStack.authentication || '').trim(),
+    String(techStack.payment_provider || '').trim(),
+    String(techStack.other_tools || '').trim(),
+  ].filter(Boolean)
 
   return {
     id,
@@ -81,6 +92,9 @@ function normalizeTemplate(row: any, developer: any): TemplateRecord {
     exclusive_price: row?.exclusive_price ? Number(row.exclusive_price) : null,
     support_package_available: Boolean(row?.support_package_available),
     support_package_price: row?.support_package_price ? Number(row.support_package_price) : null,
+    stack,
+    consultation_available: Boolean(consultation.enabled),
+    consultation_rate: consultation.hourly_rate ? Number(consultation.hourly_rate) : null,
   }
 }
 
@@ -147,9 +161,7 @@ export async function listMarketplaceTemplates(options: ListTemplatesOptions = {
       const supabase = createClient()
       const { data, error } = await supabase
         .from('templates')
-        .select(
-          'id, slug, name, description, price, category, demo_url, github_url, preview_data, developer_id, created_at, published, exclusive_purchase_available, exclusive_price, support_package_available, support_package_price'
-        )
+        .select('*')
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -167,9 +179,7 @@ export async function listMarketplaceTemplates(options: ListTemplatesOptions = {
         const adminSupabase = createAdminClient()
         const { data, error } = await adminSupabase
           .from('templates')
-          .select(
-            'id, slug, name, description, price, category, demo_url, github_url, preview_data, developer_id, created_at, published, exclusive_purchase_available, exclusive_price, support_package_available, support_package_price'
-          )
+          .select('*')
           .order('created_at', { ascending: false })
 
         if (!error) rows = data || []
@@ -209,9 +219,7 @@ export async function getMarketplaceTemplateBySlugOrId(slugOrId: string): Promis
     const lookupWithClient = async (supabase: any) => {
       const byId = await supabase
         .from('templates')
-        .select(
-          'id, slug, name, description, price, category, demo_url, github_url, preview_data, developer_id, created_at, published, exclusive_purchase_available, exclusive_price, support_package_available, support_package_price'
-        )
+        .select('*')
         .eq('id', slugOrId)
         .maybeSingle()
 
@@ -222,9 +230,7 @@ export async function getMarketplaceTemplateBySlugOrId(slugOrId: string): Promis
 
       const bySlug = await supabase
         .from('templates')
-        .select(
-          'id, slug, name, description, price, category, demo_url, github_url, preview_data, developer_id, created_at, published, exclusive_purchase_available, exclusive_price, support_package_available, support_package_price'
-        )
+        .select('*')
         .eq('slug', slugOrId)
         .maybeSingle()
 
