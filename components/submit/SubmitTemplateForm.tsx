@@ -576,9 +576,9 @@ export function SubmitTemplateForm() {
 
       {needsAuth && (
         <div className="rounded-lg border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-primary-900">
-          <p className="mb-3">Sign in with GitHub to submit templates.</p>
-          <Link href={`/login?role=developer&next=${encodeURIComponent('/submit')}`} className="btn btn-secondary w-full">
-            Continue with GitHub
+          <p className="mb-3">Complete developer onboarding with GitHub to submit templates.</p>
+          <Link href={`/api/auth/github?next=${encodeURIComponent('/developers/submit')}`} className="btn btn-secondary w-full">
+            Continue Developer Onboarding
           </Link>
         </div>
       )}

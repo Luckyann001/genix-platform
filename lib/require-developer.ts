@@ -7,7 +7,7 @@ export async function requireDeveloper(nextPath: string) {
   const user = authData.user
 
   if (!user) {
-    redirect(`/login?role=developer&next=${encodeURIComponent(nextPath)}`)
+    redirect(`/api/auth/github?next=${encodeURIComponent(nextPath)}`)
   }
 
   const { data: profile } = await supabase
@@ -18,7 +18,7 @@ export async function requireDeveloper(nextPath: string) {
 
   const userType = String(profile?.user_type || '').toLowerCase()
   if (userType !== 'developer') {
-    redirect('/templates')
+    redirect(`/api/auth/github?next=${encodeURIComponent(nextPath)}`)
   }
 
   return user
